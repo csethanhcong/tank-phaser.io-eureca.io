@@ -228,9 +228,18 @@ Tank.prototype.kill = function() {
 	this.shadow.kill();
 }
 
-var game = new Phaser.Game(1000, 600, Phaser.AUTO, 'container', { preload: preload, create: eurecaClientSetup, update: update, render: render });
+var game = new Phaser.Game(1300, 600, Phaser.AUTO, 'container', { preload: preload, create: eurecaClientSetup, update: update, render: render });
 
 function preload () {
+
+	// load tile-map
+	game.load.tilemap('map', 'assets/tank-map.json', null, Phaser.Tilemap.TILED_JSON);
+	game.load.image('tiles-1', 'assets/cyberglow.png');
+	game.load.image('tiles-2', 'assets/factory.png');
+	game.load.image('tiles-3', 'assets/metal.png');
+	game.load.image('tiles-4', 'assets/tron.png');
+	game.load.image('bg-tiles-1', 'assets/scorched_earth.png');
+	game.load.image('bg-tiles-2', 'assets/light_grass.png');
 
     game.load.atlas('tank', 'assets/tanks.png', 'assets/tanks.json');
     game.load.atlas('enemy', 'assets/enemy-tanks.png', 'assets/tanks.json');
@@ -241,17 +250,37 @@ function preload () {
     
 }
 
-
+var map;
+var layer;
+var sprite;
 
 function create () {
 
-    //  Resize our game world to be a 2000 x 2000 square
-    game.world.setBounds(-1000, -600, 2000, 1200);
+    //  Resize our game world to be a 1792 x 1000 square
+    game.world.setBounds(-1300, -600, 1792, 960);
 	game.stage.disableVisibilityChange  = true;
 	
+	// Load map
+	map = game.add.tilemap('map');
+	map.addTilesetImage('tiles-1', 'tiles-1');
+	map.addTilesetImage('tiles-2', 'tiles-2');
+	map.addTilesetImage('tiles-3', 'tiles-3');
+	map.addTilesetImage('tiles-4', 'tiles-4');
+	map.addTilesetImage('bg-tiles-1', 'bg-tiles-1');
+	map.addTilesetImage('bg-tiles-2', 'bg-tiles-2');
+
+	// map.setCollisionBetween(14, 17);
+
+	layer = map.createLayer('MainLayer');
+	layer.resizeWorld();
+
+	// sprite = game.add.sprite(64, 64, 'tank');
+	// game.physics.enable(sprite);
+	// game.camera.follow(sprite);
+
     //  Our tiled scrolling background
-    land = game.add.tileSprite(0, 0, 1000, 600, 'earth');
-    land.fixedToCamera = true;
+    // land = game.add.tileSprite(0, 0, 1300, 600, 'earth');
+    // land.fixedToCamera = true;
     
     tanksList = {};
 	
@@ -288,7 +317,7 @@ function create () {
 
     cursors = game.input.keyboard.createCursorKeys();
 	
-	setTimeout(removeLogo, 1000);
+	setTimeout(removeLogo, 2000);
 	
 }
 
@@ -311,8 +340,8 @@ function update () {
 	
 	
 	turret.rotation = game.physics.arcade.angleToPointer(turret);	
-    land.tilePosition.x = -game.camera.x;
-    land.tilePosition.y = -game.camera.y;
+    // land.tilePosition.x = -game.camera.x;
+    // land.tilePosition.y = -game.camera.y;
 
     	
 	
