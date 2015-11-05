@@ -252,6 +252,7 @@ function preload () {
 
 var map;
 var layer;
+var explosionAnimation;
 
 function create () {
 	game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -289,14 +290,16 @@ function create () {
 	shadow = player.shadow;	
 
     //  Explosion pool
-    explosions = game.add.group();
+    // explosions = game.add.group();
 
-    for (var i = 0; i < 10; i++)
-    {
-        var explosionAnimation = explosions.create(0, 0, 'kaboom', [0], false);
-        explosionAnimation.anchor.setTo(0.5, 0.5);
-        explosionAnimation.animations.add('kaboom');
-    }
+    // for (var i = 0; i < 10; i++)
+    // {
+        // explosionAnimation = explosions.create(0, 0, 'kaboom', [0], false);
+    //     explosionAnimation.anchor.setTo(0.5, 0.5);
+        // explosionAnimation.animations.add('kaboom');
+    // }
+    // explosionAnimation = game.add.sprite(100, 100, 'kaboom');
+    // explosionAnimation.animations.add('boom');
 
     tank.bringToTop();
     turret.bringToTop();
@@ -371,6 +374,10 @@ function bulletHitPlayer (tank, bullet) {
 		console.log(tank.id);		
 	}
     bullet.kill();
+
+    explosionAnimation = game.add.sprite(tank.x, tank.y, 'kaboom');
+    explosionAnimation.animations.add('boom');
+    explosionAnimation.animations.play('boom', null, false, true);
 }
 
 function render () {}
