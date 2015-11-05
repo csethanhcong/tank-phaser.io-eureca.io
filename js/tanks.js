@@ -228,7 +228,7 @@ Tank.prototype.kill = function() {
 	this.shadow.kill();
 }
 
-var game = new Phaser.Game(800, 600, Phaser.AUTO, 'container', { preload: preload, create: eurecaClientSetup, update: update, render: render });
+var game = new Phaser.Game(1000, 600, Phaser.AUTO, 'container', { preload: preload, create: eurecaClientSetup, update: update, render: render });
 
 function preload () {
 
@@ -236,7 +236,7 @@ function preload () {
     game.load.atlas('enemy', 'assets/enemy-tanks.png', 'assets/tanks.json');
     game.load.image('logo', 'assets/logo.png');
     game.load.image('bullet', 'assets/bullet.png');
-    game.load.image('earth', 'assets/scorched_earth.png');
+    game.load.image('earth', 'assets/light_grass.png');
     game.load.spritesheet('kaboom', 'assets/explosion.png', 64, 64, 23);
     
 }
@@ -246,11 +246,11 @@ function preload () {
 function create () {
 
     //  Resize our game world to be a 2000 x 2000 square
-    game.world.setBounds(-1000, -1000, 2000, 2000);
+    game.world.setBounds(-1000, -600, 2000, 1200);
 	game.stage.disableVisibilityChange  = true;
 	
     //  Our tiled scrolling background
-    land = game.add.tileSprite(0, 0, 800, 600, 'earth');
+    land = game.add.tileSprite(0, 0, 1000, 600, 'earth');
     land.fixedToCamera = true;
     
     tanksList = {};
