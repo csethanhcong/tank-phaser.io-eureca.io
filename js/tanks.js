@@ -252,31 +252,26 @@ function preload () {
 
 var map;
 var layer;
-var sprite;
 
 function create () {
-
+	game.physics.startSystem(Phaser.Physics.ARCADE);
     //  Resize our game world to be a 1792 x 1000 square
     game.world.setBounds(-1300, -600, 1792, 960);
 	game.stage.disableVisibilityChange  = true;
 	
 	// Load map
 	map = game.add.tilemap('map');
-	map.addTilesetImage('tiles-1', 'tiles-1');
-	map.addTilesetImage('tiles-2', 'tiles-2');
-	map.addTilesetImage('tiles-3', 'tiles-3');
-	map.addTilesetImage('tiles-4', 'tiles-4');
-	map.addTilesetImage('bg-tiles-1', 'bg-tiles-1');
-	map.addTilesetImage('bg-tiles-2', 'bg-tiles-2');
+	map.addTilesetImage('tiles-1');
+	map.addTilesetImage('tiles-2');
+	map.addTilesetImage('tiles-3');
+	map.addTilesetImage('tiles-4');
+	map.addTilesetImage('bg-tiles-1');
+	map.addTilesetImage('bg-tiles-2');
 
-	// map.setCollisionBetween(14, 17);
+	map.setCollision([1,3,4,5]);
 
 	layer = map.createLayer('MainLayer');
 	layer.resizeWorld();
-
-	// sprite = game.add.sprite(64, 64, 'tank');
-	// game.physics.enable(sprite);
-	// game.camera.follow(sprite);
 
     //  Our tiled scrolling background
     // land = game.add.tileSprite(0, 0, 1300, 600, 'earth');
@@ -329,6 +324,8 @@ function removeLogo () {
 function update () {
 	//do not update if client not ready
 	if (!ready) return;
+
+	game.physics.arcade.collide(tank, layer);
 	
 	player.input.left = cursors.left.isDown;
 	player.input.right = cursors.right.isDown;

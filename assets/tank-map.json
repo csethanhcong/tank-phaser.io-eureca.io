@@ -1,9 +1,7 @@
 { "height":15,
  "layers":[
         {
-         "compression":"zlib",
-         "data":"eJztlTkOACAIBIHC4\/8ftiXE4Go22lhMBdlpOExELKAkYu4Mlgtxsl2ZM+vvYG4Dnaschk8BV3egvgZ4P3coDqS\/Ok5nRjd9WR3dCYbv9X15cT9v\/IcB8wkCYw==",
-         "encoding":"base64",
+         "data":[6, 6, 6, 6, 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 6, 6, 6, 6, 6, 6, 6, 6, 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 6, 6, 6, 6, 6, 6, 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 6, 6, 6, 6, 6, 2, 2, 2, 2, 2, 2, 2, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 6, 6, 6, 2, 2, 2, 2, 2, 2, 2, 2, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 6, 2, 2, 2, 2, 2, 2, 2, 5, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 4, 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 2, 2, 2, 2, 2, 2, 6, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 6, 6, 6, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 6, 6, 6, 6, 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 6, 6, 6, 6, 6, 6, 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 6, 6, 6, 6, 6, 6, 6, 6, 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 6, 6, 6, 6, 6],
          "height":15,
          "name":"MainLayer",
          "opacity":1,
@@ -15,12 +13,12 @@
         }, 
         {
          "draworder":"topdown",
-         "height":0,
+         "height":15,
          "name":"Collision",
          "objects":[
                 {
                  "height":0,
-                 "id":14,
+                 "id":1,
                  "name":"",
                  "polyline":[
                         {
@@ -28,76 +26,28 @@
                          "y":0
                         }, 
                         {
-                         "x":70,
-                         "y":2.02083
-                        }, 
-                        {
-                         "x":70,
-                         "y":127.313
-                        }, 
-                        {
-                         "x":198,
-                         "y":127.313
-                        }, 
-                        {
-                         "x":198,
-                         "y":191.979
-                        }, 
-                        {
-                         "x":6,
-                         "y":194
-                        }, 
-                        {
-                         "x":0,
-                         "y":2.02083
-                        }],
-                 "properties":
-                    {
-
-                    },
-                 "rotation":0.036497,
-                 "type":"",
-                 "visible":true,
-                 "width":0,
-                 "x":1210.06,
-                 "y":187.937
-                }, 
-                {
-                 "height":0,
-                 "id":15,
-                 "name":"",
-                 "polyline":[
-                        {
-                         "x":0,
-                         "y":0
-                        }, 
-                        {
-                         "x":0,
-                         "y":-190
-                        }, 
-                        {
-                         "x":190,
-                         "y":-188
-                        }, 
-                        {
-                         "x":192,
-                         "y":-126
-                        }, 
-                        {
-                         "x":66,
-                         "y":-120
+                         "x":62,
+                         "y":-2
                         }, 
                         {
                          "x":64,
-                         "y":2
+                         "y":124
                         }, 
                         {
-                         "x":6,
-                         "y":6
+                         "x":194,
+                         "y":128
                         }, 
                         {
-                         "x":38,
-                         "y":-66
+                         "x":192,
+                         "y":188
+                        }, 
+                        {
+                         "x":0,
+                         "y":190
+                        }, 
+                        {
+                         "x":0,
+                         "y":4
                         }],
                  "properties":
                     {
@@ -107,12 +57,100 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":1216,
-                 "y":760
+                 "x":1214,
+                 "y":192
                 }, 
                 {
                  "height":0,
-                 "id":16,
+                 "id":2,
+                 "name":"",
+                 "polyline":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":190,
+                         "y":-4
+                        }, 
+                        {
+                         "x":188,
+                         "y":60
+                        }, 
+                        {
+                         "x":64,
+                         "y":64
+                        }, 
+                        {
+                         "x":64,
+                         "y":190
+                        }, 
+                        {
+                         "x":-4,
+                         "y":188
+                        }, 
+                        {
+                         "x":-2,
+                         "y":2
+                        }],
+                 "properties":
+                    {
+
+                    },
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":1218,
+                 "y":580
+                }, 
+                {
+                 "height":0,
+                 "id":3,
+                 "name":"",
+                 "polyline":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":2,
+                         "y":182
+                        }, 
+                        {
+                         "x":-192,
+                         "y":188
+                        }, 
+                        {
+                         "x":-194,
+                         "y":128
+                        }, 
+                        {
+                         "x":-62,
+                         "y":128
+                        }, 
+                        {
+                         "x":-66,
+                         "y":2
+                        }, 
+                        {
+                         "x":-2,
+                         "y":2
+                        }],
+                 "properties":
+                    {
+
+                    },
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":640,
+                 "y":194
+                }, 
+                {
+                 "height":0,
+                 "id":4,
                  "name":"",
                  "polyline":[
                         {
@@ -125,67 +163,23 @@
                         }, 
                         {
                          "x":190,
-                         "y":190
-                        }, 
-                        {
-                         "x":130,
                          "y":194
                         }, 
                         {
-                         "x":130,
-                         "y":70
+                         "x":124,
+                         "y":194
+                        }, 
+                        {
+                         "x":126,
+                         "y":64
                         }, 
                         {
                          "x":-2,
                          "y":66
                         }, 
                         {
-                         "x":-2,
-                         "y":2
-                        }],
-                 "properties":
-                    {
-
-                    },
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":0,
-                 "x":448,
-                 "y":574
-                }, 
-                {
-                 "height":0,
-                 "id":17,
-                 "name":"",
-                 "polyline":[
-                        {
                          "x":0,
                          "y":0
-                        }, 
-                        {
-                         "x":70,
-                         "y":2
-                        }, 
-                        {
-                         "x":66,
-                         "y":192
-                        }, 
-                        {
-                         "x":-124,
-                         "y":194
-                        }, 
-                        {
-                         "x":-124,
-                         "y":132
-                        }, 
-                        {
-                         "x":2,
-                         "y":128
-                        }, 
-                        {
-                         "x":4,
-                         "y":2
                         }],
                  "properties":
                     {
@@ -195,17 +189,17 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":574,
-                 "y":188
+                 "x":450,
+                 "y":574
                 }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
-         "width":0,
+         "width":28,
          "x":0,
          "y":0
         }],
- "nextobjectid":19,
+ "nextobjectid":5,
  "orientation":"orthogonal",
  "properties":
     {
@@ -216,39 +210,7 @@
  "tilesets":[
         {
          "firstgid":1,
-         "image":"scorched_earth.png",
-         "imageheight":64,
-         "imagewidth":64,
-         "margin":0,
-         "name":"bg-tiles-1",
-         "properties":
-            {
-
-            },
-         "spacing":0,
-         "tilecount":1,
-         "tileheight":64,
-         "tilewidth":64
-        }, 
-        {
-         "firstgid":2,
-         "image":"light_grass.png",
-         "imageheight":128,
-         "imagewidth":128,
-         "margin":0,
-         "name":"bg-tiles-2",
-         "properties":
-            {
-
-            },
-         "spacing":0,
-         "tilecount":4,
-         "tileheight":64,
-         "tilewidth":64
-        }, 
-        {
-         "firstgid":6,
-         "image":"cyberglow.png",
+         "image":"C:\/Users\/Windows\/Desktop\/NodeJS\/tank-phaser.io-eureca.io\/assets\/cyberglow.png",
          "imageheight":64,
          "imagewidth":64,
          "margin":0,
@@ -263,8 +225,24 @@
          "tilewidth":64
         }, 
         {
-         "firstgid":7,
-         "image":"factory.png",
+         "firstgid":2,
+         "image":"C:\/Users\/Windows\/Desktop\/NodeJS\/tank-phaser.io-eureca.io\/assets\/scorched_earth.png",
+         "imageheight":64,
+         "imagewidth":64,
+         "margin":0,
+         "name":"bg-tiles-1",
+         "properties":
+            {
+
+            },
+         "spacing":0,
+         "tilecount":1,
+         "tileheight":64,
+         "tilewidth":64
+        }, 
+        {
+         "firstgid":3,
+         "image":"C:\/Users\/Windows\/Desktop\/NodeJS\/tank-phaser.io-eureca.io\/assets\/factory.png",
          "imageheight":64,
          "imagewidth":64,
          "margin":0,
@@ -279,8 +257,8 @@
          "tilewidth":64
         }, 
         {
-         "firstgid":8,
-         "image":"metal.png",
+         "firstgid":4,
+         "image":"C:\/Users\/Windows\/Desktop\/NodeJS\/tank-phaser.io-eureca.io\/assets\/metal.png",
          "imageheight":64,
          "imagewidth":64,
          "margin":0,
@@ -295,8 +273,8 @@
          "tilewidth":64
         }, 
         {
-         "firstgid":9,
-         "image":"tron.png",
+         "firstgid":5,
+         "image":"C:\/Users\/Windows\/Desktop\/NodeJS\/tank-phaser.io-eureca.io\/assets\/tron.png",
          "imageheight":64,
          "imagewidth":64,
          "margin":0,
@@ -307,6 +285,22 @@
             },
          "spacing":0,
          "tilecount":1,
+         "tileheight":64,
+         "tilewidth":64
+        }, 
+        {
+         "firstgid":6,
+         "image":"C:\/Users\/Windows\/Desktop\/NodeJS\/tank-phaser.io-eureca.io\/assets\/light_grass.png",
+         "imageheight":128,
+         "imagewidth":128,
+         "margin":0,
+         "name":"bg-tiles-2",
+         "properties":
+            {
+
+            },
+         "spacing":0,
+         "tilecount":4,
          "tileheight":64,
          "tilewidth":64
         }],
