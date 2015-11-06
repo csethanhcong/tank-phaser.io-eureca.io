@@ -8,6 +8,7 @@ var turret;
 var player;
 var tanksList;
 var explosions;
+var hpBar;
 
 var logo;
 
@@ -92,7 +93,7 @@ Tank = function (index, game, player) {
     var y = 0;
 
     this.game = game;
-    this.health = 30;
+    // this.health = 30;
     this.player = player;
     this.bullets = game.add.group();
     this.bullets.enableBody = true;
@@ -112,6 +113,7 @@ Tank = function (index, game, player) {
     this.shadow = game.add.sprite(x, y, 'enemy', 'shadow');
     this.tank = game.add.sprite(x, y, 'enemy', 'tank1');
     this.turret = game.add.sprite(x, y, 'enemy', 'turret');
+    // this.hpBar = game.add.text(x - 22, y - 42, "HP: " + this.health, { font: "14px Arial Black", fill: "#66CCFF" });
 
     this.shadow.anchor.set(0.5);
     this.tank.anchor.set(0.5);
@@ -122,6 +124,8 @@ Tank = function (index, game, player) {
     this.tank.body.immovable = false;
     this.tank.body.collideWorldBounds = true;
     this.tank.body.bounce.setTo(0, 0);
+    this.tank.health = 30;
+    this.tank.hpBar = game.add.text(x - 22, y - 42, "HP: " + this.tank.health, { font: "14px Arial Black", fill: "#66CCFF" });
 
     this.tank.angle = 0;
 
@@ -150,7 +154,7 @@ Tank.prototype.update = function() {
 			this.input.y = this.tank.y;
 			this.input.angle = this.tank.angle;
 			this.input.rot = this.turret.rotation;
-			
+			this.input.health = this.tank.health;
 			
 			eurecaServer.handleKeys(this.input);
 			
@@ -205,6 +209,9 @@ Tank.prototype.update = function() {
 
     this.turret.x = this.tank.x;
     this.turret.y = this.tank.y;
+
+    this.tank.hpBar.x = this.tank.x - 22;
+    this.tank.hpBar.y = this.tank.y - 42;
 };
 
 
@@ -287,7 +294,7 @@ function create () {
 	tank.x=0;
 	tank.y=0;
 	bullets = player.bullets;
-	shadow = player.shadow;	
+	shadow = player.shadow;
 
     //  Explosion pool
     // explosions = game.add.group();
@@ -378,10 +385,15 @@ function update () {
 
 function bulletHitPlayer (tank, bullet) {
 	if (tank.id == myId) {
-		console.log(tank.id);		
+		tank.health -= 10;
+		tank.hpBar.setText("HP: " + tank.health);
+
+		if (tank.health <= 10) {
+			tank.hpBar.setStyle({ font: "14px Arial Black", fill: "#FF1A1A" });
+		}		
 	}	
 
-    explosionAnimation = game.add.sprite(bullet.x, bullet.y, 'kaboom');
+    explosionAnimation = game.add.sprite(bullet.x - 32, bullet.y - 32, 'kaboom'); // minus sizeOfBullet/2
     explosionAnimation.animations.add('boom');
     explosionAnimation.animations.play('boom', null, false, true);
 
@@ -390,7 +402,7 @@ function bulletHitPlayer (tank, bullet) {
 
 //Hit blocks
 function bulletHitBlock (bullet) {    
-    explosionAnimation = game.add.sprite(bullet.x, bullet.y, 'kaboom');
+    explosionAnimation = game.add.sprite(bullet.x - 32, bullet.y - 32, 'kaboom'); // minus sizeOfBullet/2
     explosionAnimation.animations.add('boom');
     explosionAnimation.animations.play('boom', null, false, true);
 
