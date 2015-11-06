@@ -57,7 +57,8 @@ var eurecaClientSetup = function() {
 		
 		console.log('SPAWN');
 		var tnk = new Tank(id, game, tank);
-		tanksList[id] = tnk;
+		tanksList[id] = tnk;			
+		tnk.update();
 	}
 	
 	eurecaClient.exports.updateState = function(id, state)
@@ -68,6 +69,7 @@ var eurecaClientSetup = function() {
 			tanksList[id].tank.y = state.y;
 			tanksList[id].tank.angle = state.angle;
 			tanksList[id].turret.rotation = state.rot;
+			tanksList[id].tank.health = state.health;
 			tanksList[id].update();
 		}
 	}
@@ -199,8 +201,11 @@ Tank.prototype.update = function() {
 	{
 		game.physics.arcade.velocityFromRotation(this.tank.rotation, 0, this.tank.body.velocity);
 	}
-	
-	
+
+	if (this.tank.health == 0){
+		this.kill();
+		return;
+	}
 	
 	
     this.shadow.x = this.tank.x;
@@ -233,6 +238,8 @@ Tank.prototype.kill = function() {
 	this.tank.kill();
 	this.turret.kill();
 	this.shadow.kill();
+	//Add kill hp bar
+	this.tank.hpBar.setText("");
 }
 
 var game = new Phaser.Game(1300, 600, Phaser.AUTO, 'container', { preload: preload, create: eurecaClientSetup, update: update, render: render });
@@ -354,7 +361,8 @@ function update () {
 	
     for (var i in tanksList)
     {
-		if (!tanksList[i]) continue;
+		if (!tanksList[i]) continue;		
+
 		var curBullets = tanksList[i].bullets;
 		//Check bullet hit world bounds
 		curBullets.forEach(function(member) {								
@@ -374,6 +382,7 @@ function update () {
 				var targetTank = tanksList[j].tank;
 				
 				game.physics.arcade.overlap(curBullets, targetTank, bulletHitPlayer, null, this);						
+				game.physics.arcade.collide(tanksList[i].tank, tanksList[j].tank);	
 			}
 			if (tanksList[j].alive)
 			{
@@ -385,13 +394,20 @@ function update () {
 
 function bulletHitPlayer (tank, bullet) {
 	if (tank.id == myId) {
-		tank.health -= 10;
-		tank.hpBar.setText("HP: " + tank.health);
+		// tank.health -= 10;
+		// tank.hpBar.setText("HP: " + tank.health);
 
-		if (tank.health <= 10) {
-			tank.hpBar.setStyle({ font: "14px Arial Black", fill: "#FF1A1A" });
-		}		
+		// if (tank.health <= 10) {
+		// 	tank.hpBar.setStyle({ font: "14px Arial Black", fill: "#FF1A1A" });
+		// }		
 	}	
+
+	tank.health -= 10;
+	tank.hpBar.setText("HP: " + tank.health);
+
+	if (tank.health <= 10) {
+		tank.hpBar.setStyle({ font: "14px Arial Black", fill: "#FF1A1A" });
+	}
 
     explosionAnimation = game.add.sprite(bullet.x - 32, bullet.y - 32, 'kaboom'); // minus sizeOfBullet/2
     explosionAnimation.animations.add('boom');
