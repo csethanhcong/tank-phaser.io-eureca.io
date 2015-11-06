@@ -271,8 +271,8 @@ function create () {
 
 	map.setCollision([1,3,4,5]);
 
-	layer = map.createLayer('MainLayer');
-	layer.resizeWorld();
+	layer = map.createLayer('MainLayer');		
+	layer.resizeWorld();	
 
     //  Our tiled scrolling background
     // land = game.add.tileSprite(0, 0, 1300, 600, 'earth');
@@ -328,7 +328,7 @@ function update () {
 	//do not update if client not ready
 	if (!ready) return;
 
-	game.physics.arcade.collide(tank, layer);
+	game.physics.arcade.collide(tank, layer);	
 	
 	player.input.left = cursors.left.isDown;
 	player.input.right = cursors.right.isDown;
@@ -349,6 +349,14 @@ function update () {
     {
 		if (!tanksList[i]) continue;
 		var curBullets = tanksList[i].bullets;
+		//Check bullet hit world bounds
+		curBullets.forEach(function(member) {								
+			if(member.x <= 10 || member.y <=10 || member.x >= 1770 || member.y >= 940) {
+				bulletHitBlock(member);
+			}
+		}, this, true);
+		//Check bullet hit blocks			
+		game.physics.arcade.collide(curBullets, layer, bulletHitBlock, null, this);		
 		var curTank = tanksList[i].tank;
 		for (var j in tanksList)
 		{
@@ -358,8 +366,7 @@ function update () {
 			
 				var targetTank = tanksList[j].tank;
 				
-				game.physics.arcade.overlap(curBullets, targetTank, bulletHitPlayer, null, this);
-			
+				game.physics.arcade.overlap(curBullets, targetTank, bulletHitPlayer, null, this);						
 			}
 			if (tanksList[j].alive)
 			{
@@ -372,12 +379,22 @@ function update () {
 function bulletHitPlayer (tank, bullet) {
 	if (tank.id == myId) {
 		console.log(tank.id);		
-	}
-    bullet.kill();
+	}	
 
-    explosionAnimation = game.add.sprite(tank.x, tank.y, 'kaboom');
+    explosionAnimation = game.add.sprite(bullet.x, bullet.y, 'kaboom');
     explosionAnimation.animations.add('boom');
     explosionAnimation.animations.play('boom', null, false, true);
+
+    bullet.kill();
+}
+
+//Hit blocks
+function bulletHitBlock (bullet) {    
+    explosionAnimation = game.add.sprite(bullet.x, bullet.y, 'kaboom');
+    explosionAnimation.animations.add('boom');
+    explosionAnimation.animations.play('boom', null, false, true);
+
+    bullet.kill();
 }
 
 function render () {}
