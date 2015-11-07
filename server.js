@@ -55,10 +55,7 @@ eurecaServer.exports.handshake = function()
 {	
 	for (var c in clients)
 	{
-		var remote = clients[c].remote;
-		// if (Object.keys(clients).length == 1){		
-		// 	remote.initBots();	
-		// }
+		var remote = clients[c].remote;		
 		remote.initBots();
 		for (var cc in clients)
 		{		
@@ -98,15 +95,18 @@ eurecaServer.exports.handleKeys = function (keys) {
 //be exposed to client side
 eurecaServer.exports.handleBotsInfo = function (latestBots) {
 	// console.log("LATEST");
-	// console.log(latestBots);			
-	// for (var c in clients)
-	// {
-	// 	var remote = clients[c].remote;
-	// 	remote.updateBots(latestBots);
-		
-	// 	//keep last known state so we can send it to new connected clients
-	// 	clients[c].lastBots = latestBots;
-	// }
+	// console.log(latestBots);		
+	var conn = this.connection;
+	var updatedClient = clients[conn.id];	
+	for (var c in clients)
+	{
+		// if (clients[c].id != updatedClient.id){
+			var remote = clients[c].remote;
+			remote.updateBots(latestBots);
+			//keep last known state so we can send it to new connected clients
+			clients[c].lastBots = latestBots;
+		// }				
+	}
 }
 
 server.listen(8000);
