@@ -2,7 +2,7 @@ const BOT_RANDOM = 1;
 const BOT_WALL = 2;
 
 var myId = 0;
-
+var init = false;
 var land;
 
 var shadow;
@@ -83,27 +83,41 @@ var eurecaClientSetup = function() {
 
 	//Update bots
 	eurecaClient.exports.updateBots = function(latestEnemies)
-	{			
+	{		
 		if (enemies[latestEnemies.index]){
-			enemies[latestEnemies.index].tank.x = latestEnemies.x;
-			enemies[latestEnemies.index].tank.y = latestEnemies.y;
-			enemies[latestEnemies.index].tank.health = latestEnemies.health;
-			enemies[latestEnemies.index].tank.angle = latestEnemies.angle;
-			enemies[latestEnemies.index].tank.rot = latestEnemies.rot;	
-			enemies[latestEnemies.index].update();
+			if (enemies[latestEnemies.index].tank.x != latestEnemies.x){
+				enemies[latestEnemies.index].tank.x = latestEnemies.x;	
+			} 
+			if (enemies[latestEnemies.index].tank.y != latestEnemies.y){
+				enemies[latestEnemies.index].tank.y = latestEnemies.y;	
+			}
+			if (enemies[latestEnemies.index].tank.health != latestEnemies.health){
+				enemies[latestEnemies.index].tank.health = latestEnemies.health;	
+			}
+			if (enemies[latestEnemies.index].tank.angle != latestEnemies.angle){
+				enemies[latestEnemies.index].tank.angle = latestEnemies.angle;	
+			}
+			if (enemies[latestEnemies.index].tank.rot != latestEnemies.rot){
+				enemies[latestEnemies.index].tank.rot = latestEnemies.rot;	
+			}
+						
+			// enemies[latestEnemies.index].update();
 		}		
 	}	
 
-	eurecaClient.exports.initBots = function(){		
-   	    enemies = [];
+	eurecaClient.exports.initBots = function(){			
+		if (!init){
+			enemies = [];
 
-	    enemiesTotal = 1;
-	    enemiesAlive = 1;
-	    
-    	for (var i = 0; i < enemiesTotal; i++)
-    	{
-        	enemies.push(new EnemyTank(i, game, player.tank, enemyBullets, BOT_WALL));                
-    	}	        	
+		    enemiesTotal = 1;
+		    enemiesAlive = 1;
+		    
+	    	for (var i = 0; i < enemiesTotal; i++)
+	    	{
+	        	enemies.push(new EnemyTank(i, game, player.tank, enemyBullets, BOT_RANDOM));                
+	    	}	 
+		}	   	          
+		init = true;
 	}
 }
 
@@ -155,14 +169,21 @@ EnemyTank.prototype.update = function() {
 	// 	this.tank.rotation = 0; 
 	// }
 
-	this.state.x = this.tank.x;
-	this.state.y = this.tank.y;
-	this.state.angle = this.tank.angle;
-	this.state.health = this.tank.health;
-	this.state.rot = this.turret.rotation;
-	this.state.index = parseInt(this.tank.name);
+	if (this.tank.x != this.state.x ||
+		this.tank.y != this.state.y ||
+		this.tank.angle != this.state.angle ||
+		this.tank.health != this.state.health ||
+		this.tank.rot != this.state.rot)
+	{
+		this.state.x = this.tank.x;
+		this.state.y = this.tank.y;
+		this.state.angle = this.tank.angle;
+		this.state.health = this.tank.health;
+		this.state.rot = this.turret.rotation;
+		this.state.index = parseInt(this.tank.name);
 
-	eurecaServer.handleBotsInfo(this.state);
+		eurecaServer.handleBotsInfo(this.state);
+	}	
 
     this.shadow.x = this.tank.x;
     this.shadow.y = this.tank.y;
@@ -269,7 +290,8 @@ Tank.prototype.update = function() {
 		this.cursor.left != this.input.left ||
 		this.cursor.right != this.input.right ||
 		this.cursor.up != this.input.up ||
-		this.cursor.fire != this.input.fire
+		this.cursor.fire != this.input.fire ||
+		this.input.health != this.tank.health
 	);
 	
 	
@@ -345,6 +367,7 @@ Tank.prototype.update = function() {
 
     this.tank.hpBar.x = this.tank.x - 22;
     this.tank.hpBar.y = this.tank.y - 42;
+    console.log("x = " + this.tank.x + "y = " + this.tank.y);
 };
 
 
@@ -456,18 +479,7 @@ function create () {
     enemyBullets.setAll('anchor.x', 0.5);
     enemyBullets.setAll('anchor.y', 0.5);
     enemyBullets.setAll('outOfBoundsKill', true);
-    enemyBullets.setAll('checkWorldBounds', true);
-
-    // //  Create some baddies to waste :)
-    // enemies = [];
-
-    // enemiesTotal = 5;
-    // enemiesAlive = 5;
-
-    // for (var i = 0; i < enemiesTotal; i++)
-    // {
-    //     enemies.push(new EnemyTank(i, game, player.tank, enemyBullets, BOT_WALL));                
-    // }    
+    enemyBullets.setAll('checkWorldBounds', true); 
 		
     logo = game.add.sprite(0, 200, 'logo');
     logo.fixedToCamera = true;
@@ -492,6 +504,9 @@ function removeLogo () {
 function update () {
 	//do not update if client not ready
 	if (!ready) return;
+
+	console.log("Enemimies  ");
+	console.log(enemies);
 
 	game.physics.arcade.collide(tank, layer);	
 	game.physics.arcade.overlap(enemyBullets, tank, bulletHitPlayer, null, this);
@@ -530,8 +545,7 @@ function update () {
 	        {	            
 	            game.physics.arcade.collide(curTank, enemies[t].tank);
 	            game.physics.arcade.overlap(curBullets, enemies[t].tank, bulletHitPlayer, null, this);	            						
-				game.physics.arcade.collide(enemies[t].tank, layer);
-	            enemies[t].update();
+				game.physics.arcade.collide(enemies[t].tank, layer);	            
 	        }
     	}
 
@@ -558,8 +572,7 @@ function update () {
     for (var t = 0; t < enemies.length; t++)
 	{
         if (enemies[t].alive)
-        {
-            enemiesAlive++;            
+        {                       
             enemies[t].update();
         }
 	}
