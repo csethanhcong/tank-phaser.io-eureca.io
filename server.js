@@ -12,13 +12,10 @@ var clients = {};
 var EurecaServer = require('eureca.io');
 
 //create an instance of EurecaServer
-var eurecaServer = new EurecaServer.Server({allow:['setId', 'spawnEnemy', 'kill', 'updateState']});
+var eurecaServer = new EurecaServer.Server({allow:['setId', 'spawnEnemy', 'kill', 'updateState', 'initBots', 'updateBots']});
 
 //attach eureca.io to our http server
 eurecaServer.attach(server);
-
-
-
 
 //eureca.io provides events to detect clients connect/disconnect
 
@@ -27,11 +24,11 @@ eurecaServer.onConnect(function (conn) {
     console.log('New Client id=%s ', conn.id, conn.remoteAddress);
 	
 	//the getClient method provide a proxy allowing us to call remote client functions
-    var remote = eurecaServer.getClient(conn.id);    
+    var remote = eurecaServer.getClient(conn.id);        
 	
 	//register the client
 	clients[conn.id] = {id:conn.id, remote:remote}
-	
+
 	//here we call setId (defined in the client side)
 	remote.setId(conn.id);	
 });
@@ -55,17 +52,29 @@ eurecaServer.onDisconnect(function (conn) {
 
 
 eurecaServer.exports.handshake = function()
-{
+{	
 	for (var c in clients)
 	{
 		var remote = clients[c].remote;
+		// if (Object.keys(clients).length == 1){		
+		// 	remote.initBots();	
+		// }
+		remote.initBots();
 		for (var cc in clients)
 		{		
 			//send latest known position
 			var x = clients[cc].laststate ? clients[cc].laststate.x:  0;
-			var y = clients[cc].laststate ? clients[cc].laststate.y:  0;
+			var y = clients[cc].laststate ? clients[cc].laststate.y:  0;			
 
-			remote.spawnEnemy(clients[cc].id, x, y);		
+			remote.spawnEnemy(clients[cc].id, x, y);
+			//Update the latest state for all tanks
+			if (clients[cc].laststate){
+				remote.updateState(clients[cc].id, clients[cc].laststate);
+			}
+
+			if (clients[cc].lastBots){
+				remote.updateBots(clients[cc].lastBots);
+			}					
 		}
 	}
 }
@@ -85,4 +94,19 @@ eurecaServer.exports.handleKeys = function (keys) {
 		clients[c].laststate = keys;
 	}
 }
+
+//be exposed to client side
+eurecaServer.exports.handleBotsInfo = function (latestBots) {
+	// console.log("LATEST");
+	// console.log(latestBots);			
+	// for (var c in clients)
+	// {
+	// 	var remote = clients[c].remote;
+	// 	remote.updateBots(latestBots);
+		
+	// 	//keep last known state so we can send it to new connected clients
+	// 	clients[c].lastBots = latestBots;
+	// }
+}
+
 server.listen(8000);
