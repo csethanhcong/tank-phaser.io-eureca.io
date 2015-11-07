@@ -412,6 +412,7 @@ function preload () {
     game.load.image('bullet', 'assets/bullet.png');
     game.load.image('earth', 'assets/light_grass.png');
     game.load.spritesheet('kaboom', 'assets/explosion.png', 64, 64, 23);
+    game.load.spritesheet('heart', 'assets/heart.png', 32, 32, 8);
 
     // load music and sound effects
     game.load.audio('bg-music', 'assets/audio/bg-music-2.wav');
@@ -422,6 +423,7 @@ function preload () {
 var map;
 var layer;
 var explosionAnimation;
+var heartAnimation;
 var bgMusic;
 var explosionSfx;
 
@@ -435,6 +437,10 @@ function create () {
 
 	// Add explosion effect
 	explosionSfx = game.add.audio('explosionSfx');
+
+	// heartAnimation = game.add.sprite(0, 0, 'heart'); 
+ //    heartAnimation.animations.add('heart');
+ //    heartAnimation.animations.play('heart', null, false, true);
 
     //  Resize our game world to be a 1792 x 1000 square
     game.world.setBounds(-1300, -600, 1792, 960);
@@ -609,6 +615,10 @@ function bulletHitPlayer (tank, bullet) {
     explosionAnimation.animations.add('boom');
     explosionAnimation.animations.play('boom', null, false, true);
 
+    heartAnimation = game.add.sprite(0, 0, 'heart'); 
+    heartAnimation.animations.add('heart');
+    heartAnimation.animations.play('heart', null, true, true);
+
     explosionSfx.play();
 
     bullet.kill();
@@ -621,6 +631,10 @@ function bulletHitBlock (bullet) {
     explosionAnimation.animations.play('boom', null, false, true);
 
     explosionSfx.play();
+
+    heartAnimation = game.add.sprite(0, 0, 'heart'); 
+    heartAnimation.animations.add('heart');
+    heartAnimation.animations.play('heart', null, true, true);
 
     bullet.kill();
 }
