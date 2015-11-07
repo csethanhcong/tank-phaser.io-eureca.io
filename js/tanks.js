@@ -412,15 +412,30 @@ function preload () {
     game.load.image('bullet', 'assets/bullet.png');
     game.load.image('earth', 'assets/light_grass.png');
     game.load.spritesheet('kaboom', 'assets/explosion.png', 64, 64, 23);
+
+    // load music and sound effects
+    game.load.audio('bg-music', 'assets/audio/bg-music-2.wav');
+    game.load.audio('explosionSfx', 'assets/audio/explosion.wav');
     
 }
 
 var map;
 var layer;
 var explosionAnimation;
+var bgMusic;
+var explosionSfx;
 
 function create () {
 	game.physics.startSystem(Phaser.Physics.ARCADE);
+
+	// Turn the music
+	bgMusic = game.add.audio('bg-music');
+	bgMusic.play('', 0, 1, true);
+	bgMusic.onLoop.add(loopMusic, this);
+
+	// Add explosion effect
+	explosionSfx = game.add.audio('explosionSfx');
+
     //  Resize our game world to be a 1792 x 1000 square
     game.world.setBounds(-1300, -600, 1792, 960);
 	game.stage.disableVisibilityChange  = true;
@@ -494,6 +509,10 @@ function create () {
 	
 	setTimeout(removeLogo, 2000);
 	
+}
+
+function loopMusic () {
+	bgMusic.play('', 0, 1, true);
 }
 
 function removeLogo () {
@@ -590,6 +609,8 @@ function bulletHitPlayer (tank, bullet) {
     explosionAnimation.animations.add('boom');
     explosionAnimation.animations.play('boom', null, false, true);
 
+    explosionSfx.play();
+
     bullet.kill();
 }
 
@@ -598,6 +619,8 @@ function bulletHitBlock (bullet) {
     explosionAnimation = game.add.sprite(bullet.x - 32, bullet.y - 32, 'kaboom'); // minus sizeOfBullet/2
     explosionAnimation.animations.add('boom');
     explosionAnimation.animations.play('boom', null, false, true);
+
+    explosionSfx.play();
 
     bullet.kill();
 }
