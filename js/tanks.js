@@ -42,6 +42,20 @@ var eurecaClientSetup = function() {
 	});
 	
 	
+	//the server use this method to send other client messages to the current client
+	eurecaClient.exports.sendMsg = function(nick, message)
+	{
+		var chatMsg = $('<li><b>'+nick+' </b><span>'+message+'</span></li>');
+		$('#msgbox').append(chatMsg);
+	}
+	
+	//send tchat message
+	$('#sendBtn').click(function() {
+		if (!eurecaServer) return; //client not ready
+		var nick = $('#nick').val();
+		eurecaServer.sendMsg(nick, $('#msg').val());
+	});					
+
 	//methods defined under "exports" namespace become available in the server side
 	
 	eurecaClient.exports.setId = function(id, first) 
@@ -211,7 +225,7 @@ EnemyTank = function (index, game, player, bullets, botType) {
     this.tank.body.bounce.setTo(0.5, 0.5);       
 
     this.tank.angle = game.rnd.angle();
-    this.tank.health = 30;
+    this.tank.health = 100;
 
     this.tank.hpBar = game.add.text(x - 22, y - 42, "HP: " + this.tank.health, { font: "14px Arial Black", fill: "#66CCFF" });   
 
@@ -450,7 +464,7 @@ Tank.prototype.kill = function() {
 	this.tank.hpBar.setText("");
 }
 
-var game = new Phaser.Game(1300, 600, Phaser.AUTO, 'container', { preload: preload, create: eurecaClientSetup, update: update, render: render });
+var game = new Phaser.Game(1000, 600, Phaser.AUTO, 'container', { preload: preload, create: eurecaClientSetup, update: update, render: render });
 
 function preload () {
 
@@ -474,7 +488,7 @@ function preload () {
     // load music and sound effects
     game.load.audio('bg-music', 'assets/audio/bg-music-2.wav');
     game.load.audio('explosionSfx', 'assets/audio/explosion.wav');
-    
+    game.load.audio('healthSfx', 'assets/audio/health-item-effect.wav');
 }
 
 var map;
@@ -482,6 +496,7 @@ var layer;
 var explosionAnimation;
 var bgMusic;
 var explosionSfx;
+var healthSfx;
 
 function create () {
 	game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -491,11 +506,12 @@ function create () {
 	bgMusic.play('', 0, 1, true);
 	bgMusic.onLoop.add(loopMusic, this);
 
-	// Add explosion effect
+	// Add explosion + hit item effect
 	explosionSfx = game.add.audio('explosionSfx');	
+	healthSfx = game.add.audio('healthSfx');
 
     //  Resize our game world to be a 1792 x 1000 square
-    game.world.setBounds(-1300, -600, 1792, 960);
+    game.world.setBounds(-1000, -600, 1792, 960);
 	game.stage.disableVisibilityChange  = true;
 	
 	// Load map
@@ -663,6 +679,7 @@ function tankHitItem (tank, item) {
 	tank.hpBar.setText("HP: " + tank.health);
 
 	// Load sound effect
+	healthSfx.play();
 
 	item.alive = false;	
 }

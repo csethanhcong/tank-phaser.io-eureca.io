@@ -12,7 +12,7 @@ var clients = {};
 var EurecaServer = require('eureca.io');
 
 //create an instance of EurecaServer
-var eurecaServer = new EurecaServer.Server({allow:['setId', 'spawnEnemy', 'kill', 'updateState', 'initBots', 'updateBots', 'initItems', 'updateItems']});
+var eurecaServer = new EurecaServer.Server({allow:['setId', 'spawnEnemy', 'kill', 'updateState', 'initBots', 'updateBots', 'initItems', 'updateItems', 'sendMsg']});
 
 //attach eureca.io to our http server
 eurecaServer.attach(server);
@@ -27,7 +27,7 @@ eurecaServer.onConnect(function (conn) {
     var remote = eurecaServer.getClient(conn.id);        
 	
 	//register the client
-	clients[conn.id] = {id:conn.id, remote:remote}
+	clients[conn.id] = {nick:null, id:conn.id, remote:remote}
 
 	//here we call setId (defined in the client side)
 	console.log(Object.keys(clients).length);	
@@ -56,17 +56,20 @@ eurecaServer.onDisconnect(function (conn) {
 	}	
 });
 
+//clients will call this method to send messages
+eurecaServer.exports.sendMsg = function (nick, message) {
+	for (c in clients) {
+		clients[c].remote.sendMsg(nick, message);
+	}
+}
 
-eurecaServer.exports.handshake = function()
-{	
-	for (var c in clients)
-	{
+eurecaServer.exports.handshake = function() {	
+	for (var c in clients) {
 		var remote = clients[c].remote;		
 		remote.initBots();
 		remote.initItems();			
-		for (var cc in clients)
-		{	
-			if (clients[cc].lastItems){
+		for (var cc in clients) {	
+			if (clients[cc].lastItems) {
 				remote.updateItems(clients[cc].lastItems);
 			}
 			//send latest known position
