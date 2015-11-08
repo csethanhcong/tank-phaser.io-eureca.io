@@ -12,7 +12,7 @@ var clients = {};
 var EurecaServer = require('eureca.io');
 
 //create an instance of EurecaServer
-var eurecaServer = new EurecaServer.Server({allow:['setId', 'spawnEnemy', 'kill', 'updateState', 'initBots', 'updateBots']});
+var eurecaServer = new EurecaServer.Server({allow:['setId', 'spawnEnemy', 'kill', 'updateState', 'initBots', 'updateBots', 'initItems', 'updateItems']});
 
 //attach eureca.io to our http server
 eurecaServer.attach(server);
@@ -30,7 +30,13 @@ eurecaServer.onConnect(function (conn) {
 	clients[conn.id] = {id:conn.id, remote:remote}
 
 	//here we call setId (defined in the client side)
-	remote.setId(conn.id);	
+	console.log(Object.keys(clients).length);	
+	if (Object.keys(clients).length == 1){
+		remote.setId(conn.id, true);
+	}
+	else{
+		remote.setId(conn.id, false);	
+	}	
 });
 
 //detect client disconnection
@@ -57,8 +63,12 @@ eurecaServer.exports.handshake = function()
 	{
 		var remote = clients[c].remote;		
 		remote.initBots();
+		remote.initItems();			
 		for (var cc in clients)
-		{		
+		{	
+			if (clients[cc].lastItems){
+				remote.updateItems(clients[cc].lastItems);
+			}
 			//send latest known position
 			var x = clients[cc].laststate ? clients[cc].laststate.x:  0;
 			var y = clients[cc].laststate ? clients[cc].laststate.y:  0;			
@@ -67,7 +77,7 @@ eurecaServer.exports.handshake = function()
 			//Update the latest state for all tanks
 			if (clients[cc].laststate){
 				remote.updateState(clients[cc].id, clients[cc].laststate);
-			}
+			}			
 
 			if (clients[cc].lastBots){
 				remote.updateBots(clients[cc].lastBots);
@@ -94,18 +104,33 @@ eurecaServer.exports.handleKeys = function (keys) {
 
 //be exposed to client side
 eurecaServer.exports.handleBotsInfo = function (latestBots) {
-	// console.log("LATEST");
+	// console.log("INDEX " + latestBots.index);
 	// console.log(latestBots);		
 	var conn = this.connection;
 	var updatedClient = clients[conn.id];	
 	for (var c in clients)
 	{
-		// if (clients[c].id != updatedClient.id){
+		if (clients[c].id != updatedClient.id){
 			var remote = clients[c].remote;
 			remote.updateBots(latestBots);
 			//keep last known state so we can send it to new connected clients
 			clients[c].lastBots = latestBots;
-		// }				
+		}				
+	}
+}
+
+//be exposed to client side
+eurecaServer.exports.handleItemInfo = function (latestItems) {
+	var conn = this.connection;
+	var updatedClient = clients[conn.id];	
+	for (var c in clients)
+	{
+		if (clients[c].id != updatedClient.id){
+			var remote = clients[c].remote;
+			remote.updateItems(latestItems);
+			//keep last known state so we can send it to new connected clients
+			clients[c].lastItems = latestItems;
+		}				
 	}
 }
 

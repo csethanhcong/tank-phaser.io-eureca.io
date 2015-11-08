@@ -1,10 +1,10 @@
 const BOT_RANDOM = 1;
 const BOT_WALL = 2;
-
 const HEALTH = 1;
 
 var myId = 0;
 var init = false;
+var firstPlayer = false;
 var land;
 
 var shadow;
@@ -19,11 +19,10 @@ var enemies = [];
 var enemiesTotal;
 var enemiesAlive;
 
-var item;
-var itemCount = 0;
-
 var logo;
 
+var item;
+var itemCount = 0;
 
 var cursors;
 
@@ -45,9 +44,10 @@ var eurecaClientSetup = function() {
 	
 	//methods defined under "exports" namespace become available in the server side
 	
-	eurecaClient.exports.setId = function(id) 
+	eurecaClient.exports.setId = function(id, first) 
 	{
 		//create() is moved here to make sure nothing is created before uniq id assignation
+		firstPlayer = first;		
 		myId = id;
 		create();
 		eurecaServer.handshake();
@@ -89,6 +89,8 @@ var eurecaClientSetup = function() {
 	//Update bots
 	eurecaClient.exports.updateBots = function(latestEnemies)
 	{		
+		// console.log("INDEX " + latestEnemies.index);
+		// console.log(latestEnemies);
 		if (enemies[latestEnemies.index]){
 			if (enemies[latestEnemies.index].tank.x != latestEnemies.x){
 				enemies[latestEnemies.index].tank.x = latestEnemies.x;	
@@ -111,11 +113,10 @@ var eurecaClientSetup = function() {
 	}	
 
 	eurecaClient.exports.initBots = function(){			
-		if (!init) {
+		if (!init){
 			enemies = [];
 
-		    enemiesTotal = 1;
-		    enemiesAlive = 1;
+		    enemiesTotal = 5;		    
 		    
 	    	for (var i = 0; i < enemiesTotal; i++)
 	    	{
@@ -125,14 +126,13 @@ var eurecaClientSetup = function() {
 		init = true;
 	}
 
-	eurecaClient.exports.updateItems = function() {
-		/*Check if Item not init yet!*/
-		if (item === null || item === undefined) {
-			return;
-		}
-
-		if (item.alive == false) {
-			item.kill();
+	eurecaClient.exports.updateItems = function(itemState) {
+	/*Check if Item not init yet!*/
+		if (item){
+			item.alive = itemState.alive;
+			item.sprite.x = itemState.x;
+			item.sprite.y = itemState.y;
+			item.update();
 		}
 	}
 
@@ -140,41 +140,45 @@ var eurecaClientSetup = function() {
 		itemCount++;
 
 		if (itemCount <= 1) {
-			item = new Item(game, player.tank, HEALTH);			
+			item = new Item(game, HEALTH);			
 		}
 	}
 }
 
 Item = function (game, itemType) {
 
-	var x = game.world.randomX;
-	var y = game.world.randomY;
+	var x = game.world.randomX;	
+	var y = game.world.randomY;	
 
-	this.game = game;
+	this.game = game;	
+	this.tank = tank;
+	this.state = {};
 	this.itemType = itemType;
 	this.alive = true;
 
-	if (this.itemType == HEALTH) {
+	if (this.itemType == HEALTH) {		
 		this.hpRegen = 100;
 		this.sprite = game.add.sprite(x, y, 'health');
+		game.physics.enable(this.sprite, Phaser.Physics.ARCADE);
 	}
 }
 
-// Item.prototype.update = function () {
+Item.prototype.update = function () {	
+	if (firstPlayer){
+		this.state.x = this.sprite.x;
+		this.state.y = this.sprite.y;
+		this.state.alive = this.sprite.alive;
 
-// 	if (this.alive) {
-// 		this.state.x = this.sprite.x;
-// 		this.state.y = this.sprite.y;
+		eurecaServer.handleItemInfo(this.state);
+	}
 
-// 		eurecaServer.handleItem(this.state);
-// 	} else {
-// 		this.kill();
-// 	}
-// }
+	if (this.sprite.alive == false){
+		this.kill();
+	}
+}
 
 Item.prototype.kill = function () {
-	itemCount--;
-	this.alive = false;
+	itemCount--;	
 	this.sprite.kill();
 }
 
@@ -207,7 +211,7 @@ EnemyTank = function (index, game, player, bullets, botType) {
     this.tank.body.bounce.setTo(0.5, 0.5);       
 
     this.tank.angle = game.rnd.angle();
-    this.tank.health = 100;
+    this.tank.health = 30;
 
     this.tank.hpBar = game.add.text(x - 22, y - 42, "HP: " + this.tank.health, { font: "14px Arial Black", fill: "#66CCFF" });   
 
@@ -220,26 +224,24 @@ EnemyTank = function (index, game, player, bullets, botType) {
     }       
 };
 
-EnemyTank.prototype.update = function() {
-	// if (this.tank.x <= 100 || this.tank.y <=10 || this.tank.x >= 1770 || this.tank.y >= 940) {
-	// 	this.tank.rotation = 0; 
-	// }
-
-	if (this.tank.x != this.state.x ||
+EnemyTank.prototype.update = function() {	
+	if (firstPlayer){
+		if (this.tank.x != this.state.x ||
 		this.tank.y != this.state.y ||
 		this.tank.angle != this.state.angle ||
 		this.tank.health != this.state.health ||
 		this.tank.rot != this.state.rot)
-	{
-		this.state.x = this.tank.x;
-		this.state.y = this.tank.y;
-		this.state.angle = this.tank.angle;
-		this.state.health = this.tank.health;
-		this.state.rot = this.turret.rotation;
-		this.state.index = parseInt(this.tank.name);
+		{
+			this.state.x = this.tank.x;
+			this.state.y = this.tank.y;
+			this.state.angle = this.tank.angle;
+			this.state.health = this.tank.health;
+			this.state.rot = this.turret.rotation;
+			this.state.index = parseInt(this.tank.name);
 
-		eurecaServer.handleBotsInfo(this.state);
-	}	
+			eurecaServer.handleBotsInfo(this.state);
+		}	
+	}
 
     this.shadow.x = this.tank.x;
     this.shadow.y = this.tank.y;
@@ -419,11 +421,10 @@ Tank.prototype.update = function() {
     this.shadow.rotation = this.tank.rotation;
 
     this.turret.x = this.tank.x;
-    this.turret.y = this.tank.y;
+    this.turret.y = this.tank.y;    
 
     this.tank.hpBar.x = this.tank.x - 22;
     this.tank.hpBar.y = this.tank.y - 42;
-    console.log("x = " + this.tank.x + "y = " + this.tank.y);
 };
 
 
@@ -467,7 +468,7 @@ function preload () {
     game.load.image('logo', 'assets/logo.png');
     game.load.image('bullet', 'assets/bullet.png');
     game.load.image('earth', 'assets/light_grass.png');
-    game.load.spritesheet('kaboom', 'assets/explosion.png', 64, 64, 23);
+    game.load.spritesheet('kaboom', 'assets/explosion.png', 64, 64, 23);    
     game.load.image('health', 'assets/item/health.png');
 
     // load music and sound effects
@@ -479,7 +480,6 @@ function preload () {
 var map;
 var layer;
 var explosionAnimation;
-var healthItem;
 var bgMusic;
 var explosionSfx;
 
@@ -492,13 +492,7 @@ function create () {
 	bgMusic.onLoop.add(loopMusic, this);
 
 	// Add explosion effect
-	explosionSfx = game.add.audio('explosionSfx');
-
-	healthItem = game.add.sprite(200, 200, 'health');
-
-	// heartAnimation = game.add.sprite(0, 0, 'heart'); 
- //    heartAnimation.animations.add('heart');
- //    heartAnimation.animations.play('heart', null, false, true);
+	explosionSfx = game.add.audio('explosionSfx');	
 
     //  Resize our game world to be a 1792 x 1000 square
     game.world.setBounds(-1300, -600, 1792, 960);
@@ -522,8 +516,8 @@ function create () {
     // land = game.add.tileSprite(0, 0, 1300, 600, 'earth');
     // land.fixedToCamera = true;
     
-    tanksList = {};
-	
+    tanksList = {};    
+
 	player = new Tank(myId, game, tank);
 	tanksList[myId] = player;
 	tank = player.tank;
@@ -586,15 +580,18 @@ function removeLogo () {
 
 function update () {
 	//do not update if client not ready
-	if (!ready) return;
+	if (!ready) return;	
 
-	console.log("Enemimies  ");
-	console.log(enemies);
+	if (item){
+		item.update();	
+	}	
 
 	game.physics.arcade.collide(tank, layer);	
 	game.physics.arcade.overlap(enemyBullets, tank, bulletHitPlayer, null, this);
-	game.physics.arcade.overlap(enemyBullets, layer, bulletHitBlock, null, this);
-	game.physics.arcade.overlap(tank, item, tankHitItem, null, this);
+	game.physics.arcade.overlap(enemyBullets, layer, bulletHitBlock, null, this);	
+	if (item){		
+		game.physics.arcade.overlap(tank, item.sprite, tankHitItem, null, this);
+	}	
 	
 	player.input.left = cursors.left.isDown;
 	player.input.right = cursors.right.isDown;
@@ -651,31 +648,30 @@ function update () {
 		}
     }
 
-    //Check player fire and collide vs enemies
-	enemiesAlive = 0;
+    //Check player fire and collide vs enemies	
     for (var t = 0; t < enemies.length; t++)
 	{
         if (enemies[t].alive)
         {                       
-            enemies[t].update();
+            enemies[t].update();           
         }
-	}
+	}	
 }
 
-function tankHitItem (tank, item) {
+function tankHitItem (tank, item) {	
 	tank.health = 100;
 	tank.hpBar.setText("HP: " + tank.health);
 
 	// Load sound effect
 
-	item.kill();
+	item.alive = false;	
 }
 
 function bulletHitPlayer (tank, bullet) {	
 	tank.health -= 10;
 	tank.hpBar.setText("HP: " + tank.health);
 
-	if (tank.health <= 30) {
+	if (tank.health <= 10) {
 		tank.hpBar.setStyle({ font: "14px Arial Black", fill: "#FF1A1A" });
 	}
 
@@ -683,7 +679,9 @@ function bulletHitPlayer (tank, bullet) {
     explosionAnimation.animations.add('boom');
     explosionAnimation.animations.play('boom', null, false, true);
 
-    healthItem = game.add.sprite(200, 200, 'health');
+    // heartAnimation = game.add.sprite(0, 0, 'heart'); 
+    // heartAnimation.animations.add('heart');
+    // heartAnimation.animations.play('heart', null, true, true);
 
     explosionSfx.play();
 
@@ -698,7 +696,9 @@ function bulletHitBlock (bullet) {
 
     explosionSfx.play();
 
-   	healthItem = game.add.sprite(20, 20, 'health');
+    // heartAnimation = game.add.sprite(0, 0, 'heart'); 
+    // heartAnimation.animations.add('heart');
+    // heartAnimation.animations.play('heart', null, true, true);
 
     bullet.kill();
 }
