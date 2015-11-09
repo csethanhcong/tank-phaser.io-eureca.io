@@ -90,7 +90,7 @@ eurecaServer.exports.handshake = function() {
 		currentPlayer.spawnEnemy(clients[c].id);
 		//Update the latest state for all tanks			
 
-		if (clients[c].laststate){
+		if (clients[c].laststate){			
 			currentPlayer.updateState(clients[c].id, clients[c].laststate);
 		}
 	}	
@@ -114,6 +114,8 @@ eurecaServer.exports.handleKeys = function (keys) {
 		remote.updateState(updatedClient.id, keys);
 		
 		//keep last known state so we can send it to new connected clients
+		console.log("Server receive");
+		console.log(keys)
 		clients[c].laststate = keys;
 	}
 }

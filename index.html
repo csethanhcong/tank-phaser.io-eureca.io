@@ -192,6 +192,8 @@ var eurecaClientSetup = function() {
 	
 	eurecaClient.exports.updateState = function(id, state)
 	{				
+		console.log("Client receive");
+		console.log(state);
 		if (tanksList[id])  {			
 			tanksList[id].cursor = state;
 			if (tanksList[id].tank.x != state.x){
@@ -210,6 +212,9 @@ var eurecaClientSetup = function() {
 				tanksList[id].turret.rotation = state.rot;	
 			}
 			if (tanksList[id].tank.health != state.health){
+				tanksList[id].tank.health = state.health;	
+			}
+			if (tanksList[id].tank.score != state.score){
 				tanksList[id].tank.score = state.score;	
 			}
 			if (tanksList[id].turret.rotation != state.rot){
@@ -253,7 +258,7 @@ var eurecaClientSetup = function() {
 		if (!init){
 			enemies = [];
 
-		    enemiesTotal = 5;		    
+		    enemiesTotal = 0;		    
 		    
 	    	for (var i = 0; i < enemiesTotal; i++)
 	    	{
@@ -451,7 +456,9 @@ Tank = function (index, game, player) {
 		left:false,
 		right:false,
 		up:false,
-		fire:false
+		fire:false,
+		health: 100,
+		score: 0
 	}
 
     var x = 0;
@@ -511,15 +518,15 @@ Tank.prototype.update = function() {
 		this.cursor.left != this.input.left ||
 		this.cursor.right != this.input.right ||
 		this.cursor.up != this.input.up ||
-		this.cursor.fire != this.input.fire ||
-		this.input.health != this.tank.health
+		this.cursor.fire != this.input.fire ||		
+		this.input.health != this.tank.health ||
+		this.input.score != this.tank.score
 	);
 	
 	
 	if (inputChanged)
 	{
-		//Handle input change here
-		//send new values to the server		
+		//Handle input change here, send new values to the server		
 		if (this.tank.id == myId)
 		{			
 			// send latest valid state to the server
@@ -530,14 +537,11 @@ Tank.prototype.update = function() {
 			this.input.health = this.tank.health;
 			this.input.score = this.tank.score;			
 			
-			eurecaServer.handleKeys(this.input);			
-			
+			eurecaServer.handleKeys(this.input);						
 		}
 	}
 
 	//cursor value is now updated by eurecaClient.exports.updateState method
-	
-	
     if (this.cursor.left)
     {
         this.tank.angle -= 1;
@@ -559,9 +563,8 @@ Tank.prototype.update = function() {
         }
     }
     if (this.cursor.fire)
-    {	
-    	// this.tank.score -= 2;
-		this.fire({x:this.cursor.tx, y:this.cursor.ty});
+    {	    	
+		this.fire({x:this.cursor.tx, y:this.cursor.ty});		
     }
 	
 	
@@ -712,20 +715,7 @@ function create () {
 	tank.x=0;
 	tank.y=0;
 	bullets = player.bullets;
-	shadow = player.shadow;
-
-    //  Explosion pool
-    // explosions = game.add.group();
-
-    // for (var i = 0; i < 10; i++)
-    // {
-        // explosionAnimation = explosions.create(0, 0, 'kaboom', [0], false);
-    //     explosionAnimation.anchor.setTo(0.5, 0.5);
-        // explosionAnimation.animations.add('kaboom');
-    // }
-    // explosionAnimation = game.add.sprite(100, 100, 'kaboom');
-    // explosionAnimation.animations.add('boom');
-    //  The enemies bullet group    
+	shadow = player.shadow;   
 
     tank.bringToTop();
     turret.bringToTop();
@@ -769,6 +759,7 @@ function update () {
 	//do not update if client not ready
 	if (!ready) return;	
 
+	//Update item
 	if (item){			
 		item.update();		
 		if (firstPlayer == true && item.sprite.alive == false){			
@@ -777,13 +768,15 @@ function update () {
 		}
 	}		
 
-	game.physics.arcade.collide(tank, layer);	
+	// game.physics.arcade.collide(tank, layer);	
 	if (game.physics.arcade.overlap(enemyBullets, tank, bulletHitPlayer, null, this) == true){
 		if (tank.id == myId){
 			tank.health -= 10;
 		}
 	}
-	game.physics.arcade.overlap(enemyBullets, layer, bulletHitBlock, null, this);	
+
+	game.physics.arcade.overlap(enemyBullets, layer, bulletHitBlock, null, this);
+
 	if (item){		
 		game.physics.arcade.overlap(tank, item.sprite, tankHitItem, null, this);
 	}	
@@ -792,21 +785,17 @@ function update () {
 	player.input.right = cursors.right.isDown;
 	player.input.up = cursors.up.isDown;
 	player.input.fire = game.input.activePointer.isDown;
-	player.input.tx = game.input.x+ game.camera.x;
-	player.input.ty = game.input.y+ game.camera.y;
+	player.input.tx = game.input.x + game.camera.x;
+	player.input.ty = game.input.y + game.camera.y;
 		
-	turret.rotation = game.physics.arcade.angleToPointer(turret);	
-    // land.tilePosition.x = -game.camera.x;
-    // land.tilePosition.y = -game.camera.y;
+	turret.rotation = game.physics.arcade.angleToPointer(turret);	    
 	
     for (var i in tanksList)
     {
-		if (!tanksList[i]) continue;		
+		if (!tanksList[i]) continue;							
 
-		if (tanksList[i].alive){
-			tanksList[i].update();
-		}			
-
+		//Check if player collide blocks
+		game.physics.arcade.collide(tanksList[i].tank, layer);
 
 		var curBullets = tanksList[i].bullets;
 		//Check bullet hit world bounds
@@ -860,6 +849,10 @@ function update () {
 			// {
 			// 	tanksList[j].update();
 			// }			
+		}
+
+		if (tanksList[i].alive){
+			tanksList[i].update();
 		}
     }   
 
