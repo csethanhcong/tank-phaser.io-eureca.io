@@ -7,7 +7,7 @@ app.use(express.static(__dirname));
 
 //we'll keep clients data here
 var clients = {};
-  
+var firstPlayerId;  
 //get EurecaServer class
 var EurecaServer = require('eureca.io');
 
@@ -32,6 +32,7 @@ eurecaServer.onConnect(function (conn) {
 	//here we call setId (defined in the client side)
 	console.log(Object.keys(clients).length);	
 	if (Object.keys(clients).length == 1){
+		firstPlayerId = conn.id;
 		remote.setId(conn.id, true);
 	}
 	else{
@@ -63,38 +64,50 @@ eurecaServer.exports.sendMsg = function (nick, message) {
 	}
 }
 
-eurecaServer.exports.handshake = function() {	
-	for (var c in clients) {
-		var remote = clients[c].remote;		
-		remote.initBots();
-		remote.initItems();			
-		for (var cc in clients) {	
-			if (clients[cc].lastItems) {
-				remote.updateItems(clients[cc].lastItems);
-			}
-			//send latest known position
-			var x = clients[cc].laststate ? clients[cc].laststate.x:  0;
-			var y = clients[cc].laststate ? clients[cc].laststate.y:  0;			
+eurecaServer.exports.handshake = function() {
+	//Any player handshakes with server is inited
+	var currentPlayer = clients[this.connection.id].remote;	
+	currentPlayer.initBots();
+	currentPlayer.initItems();
 
-			remote.spawnEnemy(clients[cc].id, x, y);
-			//Update the latest state for all tanks
-			if (clients[cc].laststate){
-				remote.updateState(clients[cc].id, clients[cc].laststate);
-			}			
-
-			if (clients[cc].lastBots){
-				remote.updateBots(clients[cc].lastBots);
+	//If it is the second, third, fourth ... players, update items and bots from the first player for it
+	if (Object.keys(clients).length != 1){
+		var firstPlayer;		
+		if (clients[firstPlayerId]){
+			firstPlayer = clients[firstPlayerId];					
+			if (firstPlayer.lastBots){
+				currentPlayer.updateBots(firstPlayer.lastBots);
 			}					
+
+			if (firstPlayer.lastItems) {
+				currentPlayer.updateItems(firstPlayer.lastItems);
+			}
+		}				
+	}	
+
+	//Spawn all players for this client
+	for (var c in clients) {						
+		currentPlayer.spawnEnemy(clients[c].id);
+		//Update the latest state for all tanks			
+
+		if (clients[c].laststate){
+			currentPlayer.updateState(clients[c].id, clients[c].laststate);
 		}
+	}	
+
+	//Spawn current players for other clients
+	for (var c in clients) {
+		if (clients[c].id != this.connection.id){
+			var other = clients[c].remote;								
+			other.spawnEnemy(clients[this.connection.id].id);				
+		}		
 	}
 }
-
 
 //be exposed to client side
 eurecaServer.exports.handleKeys = function (keys) {
 	var conn = this.connection;
-	var updatedClient = clients[conn.id];
-	
+	var updatedClient = clients[conn.id];	
 	for (var c in clients)
 	{
 		var remote = clients[c].remote;
