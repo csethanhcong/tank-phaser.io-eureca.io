@@ -153,11 +153,23 @@ var eurecaClientSetup = function() {
 	}
 	
 	//send tchat message
-	$('#sendBtn').click(function() {
+	$('#btn-send').click(function() {
 		if (!eurecaServer) return; //client not ready
 		var nick = $('#nick').val();
+		$('#nick').prop("disabled", true);
 		eurecaServer.sendMsg(nick, $('#msg').val());
-	});					
+		$('#msg').val('');
+	});	
+	// Handle event ENTER and send chat msg
+	$('#msg').keyup(function(event) {
+		if (event.keyCode == 13) {
+			if (!eurecaServer) return; //client not ready
+			var nick = $('#nick').val();
+			$('#nick').prop("disabled", true);
+			eurecaServer.sendMsg(nick, $('#msg').val());
+			$('#msg').val('');
+		}
+	});				
 
 	//methods defined under "exports" namespace become available in the server side
 	
