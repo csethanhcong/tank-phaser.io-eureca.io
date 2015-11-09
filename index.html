@@ -39,9 +39,9 @@
 				width: 300px;
 			}
 
-			#msg {
+			/*#msg {
 				width: 220px;
-			}
+			}*/
 
 			#msgbox li b {
 				font:700 14px arial;
@@ -57,14 +57,20 @@
 
 			<div id="message">
 				<div class="form-group">
-					<input type="text" id="nick" placeholder="Type your nickname..." />
+					<input type="text" class="form-control" id="nick" placeholder="Type your nickname..." />
 				</div>
 				<div class="form-group">
-					<ul id="msgbox"></ul>
+					<ul class="form-control" id="msgbox"></ul>
 				</div>
 				<div class="form-group">
-					<input type="text" id="msg" placeholder="Type your message..."/>
-					<button type="button" class="btn btn-info btn-sm" id="btn-send" >Send <span class="glyphicon glyphicon-send"></span></button>
+					<div class="row">
+						<div class="col-md-9" style="padding-right: 0">
+							<input id="msg" class="form-control" placeholder="Type your message..." />
+						</div>
+						<div>
+							<button type="button" class="btn btn-info btn-sm" id="btn-send" >Send <span class="glyphicon glyphicon-send"></span></button>
+						</div>
+					</div>
 				</div>
 			</div>
     	</div>
