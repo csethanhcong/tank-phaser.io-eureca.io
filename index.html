@@ -799,6 +799,7 @@ var bgMusic;
 var explosionSfx;
 var healthSfx;
 var pauseLabel;
+var win = false;
 
 function create () {			
 	game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -1012,17 +1013,20 @@ function update () {
         }
 	}	
 
-	if (winSingle == true && singleMode == true){
+	if (winSingle == true && singleMode == true && win == false){
 		game.add.text(400 + game.camera.x, 450 + game.camera.y, "YOU WIN. YOUR RESULT:  " + player.tank.score, { font: "30px Arial Black", fill: "#66CCFF" });
+		win = true;
 	}
 
-	if (player.tank.health == 0){
-		game.add.text(400 + game.camera.x, 450 + game.camera.y, "YOU LOSE. YOUR RESULT:  " + player.tank.score, { font: "30px Arial Black", fill: "#66CCFF" }); 		
+	if (player.tank.health == 0 && win == false){
+		game.add.text(400 + game.camera.x, 450 + game.camera.y, "YOU LOSE. YOUR RESULT:  " + player.tank.score, { font: "30px Arial Black", fill: "#66CCFF" }); 
+		win = true;		
 	}	
 
 	for (var i in tanksList){
-		if (tanksList[i].tank.health == 0 && tanksList[i].tank.id != myId){
-			game.add.text(400 + game.camera.x, 450 + game.camera.y, "YOU WIN. YOUR RESULT IS  " + player.tank.score, { font: "30px Arial Black", fill: "#66CCFF" });	
+		if (tanksList[i].tank.health == 0 && tanksList[i].tank.id != myId && win == false){
+			game.add.text(400 + game.camera.x, 450 + game.camera.y, "YOU WIN. YOUR RESULT:  " + player.tank.score, { font: "30px Arial Black", fill: "#66CCFF" });	
+			win = true;
 		}
 	}	
 }
