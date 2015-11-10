@@ -12,7 +12,7 @@ var firstPlayerId;
 var EurecaServer = require('eureca.io');
 
 //create an instance of EurecaServer
-var eurecaServer = new EurecaServer.Server({allow:['setId', 'spawnEnemy', 'kill', 'updateState', 'initBots', 'updateBots', 'initItems', 'updateItems', 'sendMsg']});
+var eurecaServer = new EurecaServer.Server({allow:['setId', 'spawnEnemy', 'kill', 'updateState', 'initBots', 'updateBots', 'initItems', 'updateItems', 'sendMsg', 'setReady', 'renderHighestScore']});
 
 //attach eureca.io to our http server
 eurecaServer.attach(server);
@@ -27,10 +27,9 @@ eurecaServer.onConnect(function (conn) {
     var remote = eurecaServer.getClient(conn.id);        
 	
 	//register the client
-	clients[conn.id] = {nick:null, id:conn.id, remote:remote}
+	clients[conn.id] = {nick:null, id:conn.id, remote:remote, highestScore:0}
 
-	//here we call setId (defined in the client side)
-	console.log(Object.keys(clients).length);	
+	//here we call setId (defined in the client side)	
 	if (Object.keys(clients).length == 1){
 		firstPlayerId = conn.id;
 		remote.setId(conn.id, true);
@@ -86,11 +85,13 @@ eurecaServer.exports.handshake = function() {
 	}	
 
 	//Spawn all players for this client
-	for (var c in clients) {						
-		currentPlayer.spawnEnemy(clients[c].id);
+	for (var c in clients) {		
+		// console.log("Last state: ");
+		// console.log(clients[c].laststate);		
+		currentPlayer.spawnEnemy(clients[c].id);								
+		
 		//Update the latest state for all tanks			
-
-		if (clients[c].laststate){			
+		if (clients[c].laststate){				
 			currentPlayer.updateState(clients[c].id, clients[c].laststate);
 		}
 	}	
@@ -102,6 +103,8 @@ eurecaServer.exports.handshake = function() {
 			other.spawnEnemy(clients[this.connection.id].id);				
 		}		
 	}
+
+	currentPlayer.setReady(true);
 }
 
 //be exposed to client side
@@ -114,8 +117,8 @@ eurecaServer.exports.handleKeys = function (keys) {
 		remote.updateState(updatedClient.id, keys);
 		
 		//keep last known state so we can send it to new connected clients
-		console.log("Server receive");
-		console.log(keys)
+		// console.log("Server receive");
+		// console.log(keys)
 		clients[c].laststate = keys;
 	}
 }
@@ -150,6 +153,14 @@ eurecaServer.exports.handleItemInfo = function (latestItems) {
 			clients[c].lastItems = latestItems;
 		}				
 	}
+}
+
+eurecaServer.exports.sendScore = function(score){	
+	if (score > clients[this.connection.id].highestScore){
+		clients[this.connection.id].highestScore = score;
+	}
+
+	clients[this.connection.id].remote.renderHighestScore(clients[this.connection.id].highestScore);
 }
 
 server.listen(8000);

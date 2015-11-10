@@ -70,7 +70,7 @@
 						<div>
 							<button type="button" class="btn btn-info btn-sm" id="btn-send" >Send <span class="glyphicon glyphicon-send"></span></button>
 						</div>
-					</div>
+					</div>>
 				</div>
 			</div>
     	</div>
@@ -82,31 +82,9 @@
 
 		<script src="/eureca.js"></script>
 		<script src="./js/phaser.js" type="text/javascript"></script>		
-<!--		<script src="./js/tanks.js" type="text/javascript"></script> -->
-
-		<!--<script>
-			var client = new Eureca.Client();
-			var server;
-			client.ready(function (proxy) {
-				server = proxy;
-			});
-			
-			
-			//the server use this method to send other client messages to the current client
-			client.exports.sendMsg = function(nick, message)
-			{
-				var tchatline = $('<li><b>'+nick+' </b><span>'+message+'</span></li>');
-				$('#msgbox').append(tchatline);
-			}
-			
-			//send tchat message
-			$('#sendBtn').click(function() {
-				if (!server) return; //client not ready
-				var nick = $('#nick').val();
-				server.sendMsg(nick, $('#msg').val());
-			});					
-		</script> -->
 		<script type="text/javascript">
+
+//Code		
 const BOT_RANDOM = 1;
 const BOT_WALL = 2;
 const HEALTH = 1;
@@ -183,10 +161,14 @@ var eurecaClientSetup = function() {
 	{
 		//create() is moved here to make sure nothing is created before uniq id assignation
 		firstPlayer = first;		
-		myId = id;
-		create();
+		myId = id;		
 		eurecaServer.handshake();
-		ready = true;
+		create();		
+	}	
+
+	eurecaClient.exports.setReady = function(val)
+	{	
+		ready = val;
 	}	
 	
 	eurecaClient.exports.kill = function(id)
@@ -202,16 +184,16 @@ var eurecaClientSetup = function() {
 		
 		if (id == myId) return; //this is me
 		
-		console.log('SPAWN');
+		console.log('SPAWN');		
 		var tnk = new Tank(id, game, tank);
-		tanksList[id] = tnk;			
-		tnk.update();
+		tanksList[id] = tnk;		
+		tnk.update();					
 	}
 	
 	eurecaClient.exports.updateState = function(id, state)
 	{				
-		console.log("Client receive");
-		console.log(state);
+		// console.log("Client receive");
+		// console.log(state);
 		if (tanksList[id])  {			
 			tanksList[id].cursor = state;
 			if (tanksList[id].tank.x != state.x){
@@ -228,18 +210,10 @@ var eurecaClientSetup = function() {
 			}
 			if (tanksList[id].turret.rotation != state.rot){
 				tanksList[id].turret.rotation = state.rot;	
-			}
-			if (tanksList[id].tank.health != state.health){
-				tanksList[id].tank.health = state.health;	
-			}
-			if (tanksList[id].tank.score != state.score){
-				tanksList[id].tank.score = state.score;	
-			}
+			}		
 			if (tanksList[id].turret.rotation != state.rot){
 				tanksList[id].turret.rotation = state.rot;	
-			}
-																			
-			tanksList[id].update();
+			}		
 		}
 	}
 
@@ -264,11 +238,6 @@ var eurecaClientSetup = function() {
 			if (enemies[latestEnemies.index].tank.rot != latestEnemies.rot){
 				enemies[latestEnemies.index].tank.rot = latestEnemies.rot;	
 			}
-			// if (enemies[latestEnemies.index].player != latestEnemies.player){
-			// 	enemies[latestEnemies.index].player = latestEnemies.player;	
-			// }
-						
-			// enemies[latestEnemies.index].update();
 		}		
 	}	
 
@@ -276,7 +245,7 @@ var eurecaClientSetup = function() {
 		if (!init){
 			enemies = [];
 
-		    enemiesTotal = 0;		    
+		    enemiesTotal = 5;		    
 		    
 	    	for (var i = 0; i < enemiesTotal; i++)
 	    	{
@@ -303,7 +272,10 @@ var eurecaClientSetup = function() {
 			item = new Item(game, HEALTH);			
 		}
 	}
-}
+
+	eurecaClient.exports.renderHighestScore = function(score) {			
+		game.add.text(400 + game.camera.x, 500 + game.camera.y, "YOUR HIGHEST RESULT:  " + score, { font: "30px Arial Black", fill: "#66CCFF" });
+	}}
 
 Item = function (game, itemType) {
 
@@ -467,7 +439,11 @@ Tank = function (index, game, player) {
 		left:false,
 		right:false,
 		up:false,
-		fire:false		
+		fire:false,
+		hit: false,	
+		score: false,
+		score5: false,
+		score10: false	
 	}
 
 	this.input = {
@@ -475,16 +451,16 @@ Tank = function (index, game, player) {
 		right:false,
 		up:false,
 		fire:false,
-		health: 100,
-		score: 0
+		hit: false,		
+		score: false,
+		score5: false,
+		score10: false	
 	}
 
     var x = 0;
     var y = 0;
 
-    this.game = game;    
-    // this.health = 30;
-    this.player = player;
+    this.game = game;        
     this.bullets = game.add.group();
     this.bullets.enableBody = true;
     this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
@@ -502,8 +478,7 @@ Tank = function (index, game, player) {
 
     this.shadow = game.add.sprite(x, y, 'tank', 'shadow');
     this.tank = game.add.sprite(x, y, 'tank', 'tank1');
-    this.turret = game.add.sprite(x, y, 'tank', 'turret');
-    // this.hpBar = game.add.text(x - 22, y - 42, "HP: " + this.health, { font: "14px Arial Black", fill: "#66CCFF" });
+    this.turret = game.add.sprite(x, y, 'tank', 'turret');    
 
     this.shadow.anchor.set(0.5);
     this.tank.anchor.set(0.5);
@@ -517,12 +492,12 @@ Tank = function (index, game, player) {
     this.tank.body.bounce.setTo(0, 0);
     this.tank.health = 100;
     if (this.tank.id == myId){
-    	this.tank.hpBar = game.add.text(x - 22, y - 42, "Me - HP: " + this.tank.health, { font: "14px Arial Black", fill: "#66CCFF" });
+    	this.tank.hpBar = game.add.text(x - 22, y - 45, "Me - HP: " + this.tank.health, { font: "14px Arial Black", fill: "#66CCFF" });
     }    
     else{
-    	this.tank.hpBar = game.add.text(x - 22, y - 42, "HP: " + this.tank.health, { font: "14px Arial Black", fill: "#66CCFF" });
+    	this.tank.hpBar = game.add.text(x - 22, y - 50, "HP: " + this.tank.health, { font: "14px Arial Black", fill: "#66CCFF" });
     }
-    this.tank.scoreBar = game.add.text(x - 22, y - 60, "Score: " + this.tank.score, { font: "14px Arial Black", fill: "#66CCFF" });
+    this.tank.scoreBar = game.add.text(x - 22, y - 65, "Score: " + this.tank.score, { font: "14px Arial Black", fill: "#66CCFF" });
 
     this.tank.angle = 0;
 
@@ -536,9 +511,11 @@ Tank.prototype.update = function() {
 		this.cursor.left != this.input.left ||
 		this.cursor.right != this.input.right ||
 		this.cursor.up != this.input.up ||
-		this.cursor.fire != this.input.fire ||		
-		this.input.health != this.tank.health ||
-		this.input.score != this.tank.score
+		this.cursor.fire != this.input.fire	||	
+		this.cursor.hit != this.input.hit ||
+		this.cursor.score != this.input.score ||	
+		this.cursor.score5 != this.input.score5 ||
+		this.cursor.score10 != this.input.score10
 	);
 	
 	
@@ -551,9 +528,7 @@ Tank.prototype.update = function() {
 			this.input.x = this.tank.x;
 			this.input.y = this.tank.y;
 			this.input.angle = this.tank.angle;
-			this.input.rot = this.turret.rotation;
-			this.input.health = this.tank.health;
-			this.input.score = this.tank.score;			
+			this.input.rot = this.turret.rotation;								
 			
 			eurecaServer.handleKeys(this.input);						
 		}
@@ -584,9 +559,28 @@ Tank.prototype.update = function() {
     {	    	
 		this.fire({x:this.cursor.tx, y:this.cursor.ty});		
     }
+	if (this.cursor.hit){
+		this.tank.health -= 10;			
+	}
+	if (this.cursor.score){
+		this.tank.score -= 1;				
+	}
+	if (this.cursor.score5){
+		this.tank.score += 5;			
+	}
+	if (this.cursor.score10){
+		this.tank.score += 10;			
+	}
 	
-	
-	
+	if (this.tank.score <= 0){
+		this.tank.score = 0;
+	}
+
+	if (this.tank.health == 0){
+		this.kill();
+		return;
+	}
+
     if (this.currentSpeed > 0)
     {
         game.physics.arcade.velocityFromRotation(this.tank.rotation, this.currentSpeed, this.tank.body.velocity);
@@ -594,11 +588,6 @@ Tank.prototype.update = function() {
 	else
 	{
 		game.physics.arcade.velocityFromRotation(this.tank.rotation, 0, this.tank.body.velocity);
-	}
-
-	if (this.tank.health == 0){
-		this.kill();
-		return;
 	}
 	
 	
@@ -610,7 +599,7 @@ Tank.prototype.update = function() {
     this.turret.y = this.tank.y;    
 
     this.tank.hpBar.x = this.tank.x - 22;
-    this.tank.hpBar.y = this.tank.y - 42;
+    this.tank.hpBar.y = this.tank.y - 50;
     if (this.tank.health <= 30) {
 		this.tank.hpBar.setStyle({ font: "14px Arial Black", fill: "#FF1A1A" });
 	}
@@ -626,7 +615,7 @@ Tank.prototype.update = function() {
 
     this.tank.scoreBar.setText("Score: " + this.tank.score);
     this.tank.scoreBar.x = this.tank.x - 22;
-    this.tank.scoreBar.y = this.tank.y - 60;
+    this.tank.scoreBar.y = this.tank.y - 65;
 };
 
 
@@ -653,8 +642,62 @@ Tank.prototype.kill = function() {
 	this.tank.scoreBar.setText("");
 }
 
-var game = new Phaser.Game(1000, 600, Phaser.AUTO, 'container', { preload: preload, create: eurecaClientSetup, update: update, render: render });
+// var game = new Phaser.Game(1000, 600, Phaser.AUTO, 'container', { preload: preload, create: eurecaClientSetup, update: update, render: render });
 
+var game = new Phaser.Game(1000, 600, Phaser.AUTO, 'container');
+
+BeginMenu = function(){};
+BeginMenu.prototype = {		
+	create: function(){		
+		this.game.stage.backgroundColor = '#707070';
+		var play = this.game.add.text(400, 400, 'Main Menu', {font:'50px Arial', fill: '#fff'});
+		var about = this.game.add.text(400, 500, 'About', {font:'50px Arial', fill: '#fff'});	
+		play.inputEnabled = true;	
+		play.events.onInputUp.add(begin);
+
+
+		function begin(){
+			game.state.start('Game');
+		}
+
+		about.inputEnabled = true;	
+		about.events.onInputUp.add(aboutFunc);
+
+		function aboutFunc(){
+			game.state.start('About');
+		}
+	}
+}
+
+About = function(){};
+About.prototype = {		
+	create: function(){		
+		this.game.stage.backgroundColor = '#707070';
+		var play = this.game.add.text(400, 400, 'About: This is a basic game', {font:'50px Arial', fill: '#fff'});	
+		play.inputEnabled = true;	
+		play.events.onInputUp.add(begin);	
+
+		function begin(){
+			game.state.start('BeginMenu');
+		}
+	}
+}
+
+Game = function(){};
+
+Game.prototype = {
+	preload: preload,
+	create: eurecaClientSetup,
+	update: update
+}
+
+game.state.add('BeginMenu', BeginMenu);
+game.state.add('About', About);
+game.state.add('Game', Game);
+
+game.state.start('BeginMenu');
+
+//Game state
 function preload () {
 
 	// load tile-map
@@ -687,10 +730,9 @@ var explosionAnimation;
 var bgMusic;
 var explosionSfx;
 var healthSfx;
+var pauseLabel;
 
-function create () {	
-	game.time.events.add(Phaser.Timer.SECOND * 120, null, this);	
-
+function create () {			
 	game.physics.startSystem(Phaser.Physics.ARCADE);
 
 	// Turn the music
@@ -719,10 +761,6 @@ function create () {
 
 	layer = map.createLayer('MainLayer');		
 	layer.resizeWorld();	
-
-    //  Our tiled scrolling background
-    // land = game.add.tileSprite(0, 0, 1300, 600, 'earth');
-    // land.fixedToCamera = true;
     
     tanksList = {};    
 
@@ -759,6 +797,22 @@ function create () {
     game.camera.focusOnXY(0, 0);
 
     cursors = game.input.keyboard.createCursorKeys();
+
+    pauseLabel = game.add.text(500 + game.camera.x, 30 + game.camera.y, 'Pause', { font: '24px Arial', fill: '#fff' });
+    pauseLabel.inputEnabled = true;
+    pauseLabel.events.onInputUp.add(function () {    	        
+        game.paused = true;	       
+    }); 
+
+    game.input.onDown.add(unpause);
+
+    // And finally the method that handels the pause menu
+    function unpause(){
+        // Only act if paused
+        if (game.paused){            
+            game.paused = false;
+        }
+    };   
 	
 	setTimeout(removeLogo, 2000);
 	
@@ -774,6 +828,9 @@ function removeLogo () {
 }
 
 function update () {
+	if (pauseLabel){
+		pauseLabel.setText("Pause");
+	}	
 	//do not update if client not ready
 	if (!ready) return;	
 
@@ -786,31 +843,35 @@ function update () {
 		}
 	}		
 
+	player.input.hit = false;
+	player.input.score = false;
+	player.input.score5 = false;
+	player.input.score10 = false;
+
 	// game.physics.arcade.collide(tank, layer);	
 	if (game.physics.arcade.overlap(enemyBullets, tank, bulletHitPlayer, null, this) == true){
 		if (tank.id == myId){
-			tank.health -= 10;
+			player.input.hit = true;
 		}
 	}
 
-	game.physics.arcade.overlap(enemyBullets, layer, bulletHitBlock, null, this);
-
-	if (item){		
-		game.physics.arcade.overlap(tank, item.sprite, tankHitItem, null, this);
-	}	
+	game.physics.arcade.overlap(enemyBullets, layer, bulletHitBlock, null, this);	
 	
 	player.input.left = cursors.left.isDown;
 	player.input.right = cursors.right.isDown;
 	player.input.up = cursors.up.isDown;
 	player.input.fire = game.input.activePointer.isDown;
 	player.input.tx = game.input.x + game.camera.x;
-	player.input.ty = game.input.y + game.camera.y;
+	player.input.ty = game.input.y + game.camera.y;	
 		
 	turret.rotation = game.physics.arcade.angleToPointer(turret);	    
 	
     for (var i in tanksList)
     {
-		if (!tanksList[i]) continue;							
+		if (!tanksList[i]) continue;	
+		if (item){		
+			game.physics.arcade.overlap(tanksList[i].tank, item.sprite, tankHitItem, null, this);
+		}						
 
 		//Check if player collide blocks
 		game.physics.arcade.collide(tanksList[i].tank, layer);
@@ -821,13 +882,15 @@ function update () {
 			if(member.x <= 10 || member.y <=10 || member.x >= 1770 || member.y >= 940) {
 				bulletHitBlock(member);
 				if (tanksList[i].tank.id == myId){
-            		tanksList[i].tank.score -= 1;
+            		tanksList[i].input.score = true;
             	}		
 			}
 		}, this, true);
 		//Check bullet hit blocks			
 		if (game.physics.arcade.collide(curBullets, layer, bulletHitBlock, null, this) == true){
-			tanksList[i].tank.score -= 1;
+			if (tanksList[i].tank.id == myId){
+				tanksList[i].input.score = true;
+			}			
 		}	
 
 		var curTank = tanksList[i].tank;
@@ -839,8 +902,8 @@ function update () {
 	            game.physics.arcade.collide(curTank, enemies[t].tank);
 	            if (game.physics.arcade.overlap(curBullets, enemies[t].tank, bulletHitPlayer, null, this) == true){
 	            	enemies[t].tank.health -= 10;
-	            	if (tanksList[i].tank.id == myId){
-	            		tanksList[i].tank.score += 5;
+	            	if (tanksList[i].tank.id == myId){	            		
+						tanksList[i].input.score5 = true;			
 	            	}	            	
 	            }	            						
 				game.physics.arcade.collide(enemies[t].tank, layer);	            
@@ -855,24 +918,22 @@ function update () {
 			
 				var targetTank = tanksList[j].tank;
 				
-				if (game.physics.arcade.overlap(curBullets, targetTank, bulletHitPlayer, null, this)){
-					// if (tanksList[i].tank.id == myId){
-						targetTank.health -= 10;
-	            		tanksList[i].tank.score += 10;
-	            	// }					
+				if (game.physics.arcade.overlap(curBullets, targetTank, bulletHitPlayer, null, this) == true){										
+					tanksList[j].input.hit = true;										
+					if (tanksList[i].tank.id == myId){
+						tanksList[i].input.score10 = true;
+					}	            			            	
 				}						
-				game.physics.arcade.collide(tanksList[i].tank, tanksList[j].tank);	
-			}
-			// if (tanksList[j].alive)
-			// {
-			// 	tanksList[j].update();
-			// }			
-		}
+				game.physics.arcade.collide(tanksList[i].tank, tanksList[j].tank);				
+			}		
+		}		
+    }   
 
-		if (tanksList[i].alive){
+    for (var i in tanksList){
+    	if (tanksList[i].alive){
 			tanksList[i].update();
 		}
-    }   
+    }
 
     //Check player fire and collide vs enemies	
     for (var t = 0; t < enemies.length; t++)
@@ -884,7 +945,8 @@ function update () {
 	}	
 
 	if (player.tank.health == 0){
-		game.add.text(500, 500, "YOUR RESULT:  " + player.tank.score, { font: "30px Arial Black", fill: "#66CCFF" }); 
+		game.add.text(400 + game.camera.x, 450 + game.camera.y, "YOUR RESULT:  " + player.tank.score, { font: "30px Arial Black", fill: "#66CCFF" }); 
+		eurecaServer.sendScore(player.tank.score);
 	}		
 }
 
@@ -906,10 +968,6 @@ function bulletHitPlayer (tank, bullet) {
     explosionAnimation.animations.add('boom');
     explosionAnimation.animations.play('boom', null, false, true);
 
-    // heartAnimation = game.add.sprite(0, 0, 'heart'); 
-    // heartAnimation.animations.add('heart');
-    // heartAnimation.animations.play('heart', null, true, true);
-
     explosionSfx.play();
 
     bullet.kill();
@@ -923,10 +981,6 @@ function bulletHitBlock (bullet) {
 
     explosionSfx.play();
 
-    // heartAnimation = game.add.sprite(0, 0, 'heart'); 
-    // heartAnimation.animations.add('heart');
-    // heartAnimation.animations.play('heart', null, true, true);
-
     bullet.kill();
 }
 
@@ -934,7 +988,6 @@ function render () {
 	// game.debug.text("Time remaining: " + game.time.events.duration, 32, 32);
 }
 
-
-
 	</script>
 </html>
+
