@@ -119,7 +119,8 @@ eurecaServer.exports.handleKeys = function (keys) {
 		//keep last known state so we can send it to new connected clients
 		// console.log("Server receive");
 		// console.log(keys)
-		clients[c].laststate = keys;
+		if (this.connection.id == clients[c].id)
+			clients[c].laststate = keys;
 	}
 }
 
@@ -128,7 +129,7 @@ eurecaServer.exports.handleBotsInfo = function (latestBots) {
 	// console.log("INDEX " + latestBots.index);
 	// console.log(latestBots);		
 	var conn = this.connection;
-	var updatedClient = clients[conn.id];	
+	var updatedClient = clients[conn.id];
 	for (var c in clients)
 	{
 		if (clients[c].id != updatedClient.id){

@@ -70,7 +70,7 @@
 						<div>
 							<button type="button" class="btn btn-info btn-sm" id="btn-send" >Send <span class="glyphicon glyphicon-send"></span></button>
 						</div>
-					</div>>
+					</div>
 				</div>
 			</div>
     	</div>
@@ -160,7 +160,7 @@ var eurecaClientSetup = function() {
 	eurecaClient.exports.setId = function(id, first) 
 	{
 		//create() is moved here to make sure nothing is created before uniq id assignation
-		firstPlayer = first;		
+		firstPlayer = first;
 		myId = id;		
 		eurecaServer.handshake();
 		create();		
@@ -245,7 +245,7 @@ var eurecaClientSetup = function() {
 		if (!init){
 			enemies = [];
 
-		    enemiesTotal = 5;		    
+		    enemiesTotal = 3;		    
 		    
 	    	for (var i = 0; i < enemiesTotal; i++)
 	    	{
@@ -457,8 +457,8 @@ Tank = function (index, game, player) {
 		score10: false	
 	}
 
-    var x = 0;
-    var y = 0;
+    var x = 500;
+    var y = 250;
 
     this.game = game;        
     this.bullets = game.add.group();
@@ -648,10 +648,24 @@ var game = new Phaser.Game(1000, 600, Phaser.AUTO, 'container');
 
 BeginMenu = function(){};
 BeginMenu.prototype = {		
+	preload: function() {
+		this.game.load.image('bg-beginmenu', 'assets/bg.jpg');
+	},
 	create: function(){		
-		this.game.stage.backgroundColor = '#707070';
-		var play = this.game.add.text(400, 400, 'Main Menu', {font:'50px Arial', fill: '#fff'});
-		var about = this.game.add.text(400, 500, 'About', {font:'50px Arial', fill: '#fff'});	
+		this.game.add.sprite(0, 0,'bg-beginmenu');
+		var play = this.game.add.text(80, 250, 'Main Menu', {font:'50px Arial', fill: '#fff'});
+		var about = this.game.add.text(80, 320, 'About', {font:'50px Arial', fill: '#fff'});	
+
+		// Set Stroke for text
+		play.stroke = "#0000E6";
+	    play.strokeThickness = 8;
+	    play.setShadow(2, 2, "#9494B8", 2, true, false);
+
+	    about.stroke = "#0000E6";
+	    about.strokeThickness = 8;
+	    about.setShadow(2, 2, "#9494B8", 2, true, false);
+
+
 		play.inputEnabled = true;	
 		play.events.onInputUp.add(begin);
 
@@ -671,11 +685,25 @@ BeginMenu.prototype = {
 
 About = function(){};
 About.prototype = {		
+	preload: function() {
+		this.game.load.image('bg-beginmenu', 'assets/bg.jpg');
+	},
 	create: function(){		
-		this.game.stage.backgroundColor = '#707070';
-		var play = this.game.add.text(400, 400, 'About: This is a basic game', {font:'50px Arial', fill: '#fff'});	
-		play.inputEnabled = true;	
-		play.events.onInputUp.add(begin);	
+		this.game.add.sprite(0, 0,'bg-beginmenu');
+		var mem1 = this.game.add.text(80, 50, 'Pham Thanh Cong - 51200399', {font:'25px Arial', fill: '#fff'});	
+		var mem2 = this.game.add.text(80, 100, 'Nguyen Trong Nghia - 51202370', {font:'25px Arial', fill: '#fff'});	
+
+		// Set Stroke for text
+		mem1.stroke = "#0000E6";
+	    mem1.strokeThickness = 8;
+	    mem1.setShadow(2, 2, "#9494B8", 2, true, false);
+
+	    mem2.stroke = "#0000E6";
+	    mem2.strokeThickness = 8;
+	    mem2.setShadow(2, 2, "#9494B8", 2, true, false);
+
+		mem1.inputEnabled = true;	
+		mem1.events.onInputUp.add(begin);	
 
 		function begin(){
 			game.state.start('BeginMenu');
@@ -744,7 +772,7 @@ function create () {
 	explosionSfx = game.add.audio('explosionSfx');	
 	healthSfx = game.add.audio('healthSfx');
 
-    //  Resize our game world to be a 1792 x 1000 square
+    //  Resize our game world to be a 1792 x 960 square
     game.world.setBounds(-1000, -600, 1792, 960);
 	game.stage.disableVisibilityChange  = true;
 	
