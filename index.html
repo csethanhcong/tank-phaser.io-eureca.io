@@ -104,7 +104,10 @@ var explosions;
 var hpBar;
 var enemies = [];
 var enemiesTotal;
+var ENEMIES_NUM = 5;
 var enemiesAlive;
+var winSingle = true;
+var singleMode = true;
 
 var logo;
 
@@ -245,7 +248,7 @@ var eurecaClientSetup = function() {
 		if (!init){
 			enemies = [];
 
-		    enemiesTotal = 3;		    
+		    enemiesTotal = ENEMIES_NUM;		    
 		    
 	    	for (var i = 0; i < enemiesTotal; i++)
 	    	{
@@ -272,15 +275,25 @@ var eurecaClientSetup = function() {
 			item = new Item(game, HEALTH);			
 		}
 	}
-
-	eurecaClient.exports.renderHighestScore = function(score) {			
-		game.add.text(400 + game.camera.x, 500 + game.camera.y, "YOUR HIGHEST RESULT:  " + score, { font: "30px Arial Black", fill: "#66CCFF" });
-	}}
+}
 
 Item = function (game, itemType) {
 
 	var x = game.world.randomX;	
 	var y = game.world.randomY;	
+
+	if (x <= 100){
+    	x += 100;
+    }
+    if (y <= 100){
+    	y += 100;
+    }
+    if (x >= game.world.width - 100){
+    	x -= 100;
+    }
+    if (y >= game.world.height - 100){
+    	y -= 100;
+    }
 
 	this.game = game;	
 	this.tank = tank;
@@ -317,6 +330,19 @@ EnemyTank = function (index, game, player, bullets, botType) {
 
     var x = game.world.randomX;
     var y = game.world.randomY;
+
+    if (x <= 100){
+    	x += 100;
+    }
+    if (y <= 100){
+    	y += 100;
+    }
+    if (x >= game.world.width - 100){
+    	x -= 100
+    }
+    if (y >= game.world.height - 100){
+    	y -= 100
+    }
 
     this.game = game;    
     this.state = {};
@@ -457,8 +483,8 @@ Tank = function (index, game, player) {
 		score10: false	
 	}
 
-    var x = 500;
-    var y = 250;
+    var x = 100;
+    var y = 100;
 
     this.game = game;        
     this.bullets = game.add.group();
@@ -478,7 +504,7 @@ Tank = function (index, game, player) {
 
     this.shadow = game.add.sprite(x, y, 'tank', 'shadow');
     this.tank = game.add.sprite(x, y, 'tank', 'tank1');
-    this.turret = game.add.sprite(x, y, 'tank', 'turret');    
+    this.turret = game.add.sprite(x, y, 'tank', 'turret');   
 
     this.shadow.anchor.set(0.5);
     this.tank.anchor.set(0.5);
@@ -653,13 +679,18 @@ BeginMenu.prototype = {
 	},
 	create: function(){		
 		this.game.add.sprite(0, 0,'bg-beginmenu');
-		var play = this.game.add.text(80, 250, 'Main Menu', {font:'50px Arial', fill: '#fff'});
-		var about = this.game.add.text(80, 320, 'About', {font:'50px Arial', fill: '#fff'});	
+		var play = this.game.add.text(80, 250, 'Single', {font:'50px Arial', fill: '#fff'});
+		var battle = this.game.add.text(80, 320, 'Battle', {font:'50px Arial', fill: '#fff'});
+		var about = this.game.add.text(80, 390, 'About', {font:'50px Arial', fill: '#fff'});	
 
 		// Set Stroke for text
 		play.stroke = "#0000E6";
 	    play.strokeThickness = 8;
 	    play.setShadow(2, 2, "#9494B8", 2, true, false);
+
+	    battle.stroke = "#0000E6";
+	    battle.strokeThickness = 8;
+	    battle.setShadow(2, 2, "#9494B8", 2, true, false);
 
 	    about.stroke = "#0000E6";
 	    about.strokeThickness = 8;
@@ -679,6 +710,15 @@ BeginMenu.prototype = {
 
 		function aboutFunc(){
 			game.state.start('About');
+		}
+
+		battle.inputEnabled = true;	
+		battle.events.onInputUp.add(battleFunc);
+
+		function battleFunc(){
+			ENEMIES_NUM = 0;
+			singleMode = false;
+			game.state.start('Game');
 		}
 	}
 }
@@ -795,9 +835,7 @@ function create () {
 	player = new Tank(myId, game, tank);
 	tanksList[myId] = player;
 	tank = player.tank;
-	turret = player.turret;
-	tank.x=0;
-	tank.y=0;
+	turret = player.turret;	
 	bullets = player.bullets;
 	shadow = player.shadow;   
 
@@ -963,19 +1001,30 @@ function update () {
 		}
     }
 
+    winSingle = true;
     //Check player fire and collide vs enemies	
     for (var t = 0; t < enemies.length; t++)
-	{
+	{		
         if (enemies[t].alive)
-        {                       
+        {          
+        	winSingle = false;             
             enemies[t].update();           
         }
 	}	
 
+	if (winSingle == true && singleMode == true){
+		game.add.text(400 + game.camera.x, 450 + game.camera.y, "YOU WIN. YOUR RESULT:  " + player.tank.score, { font: "30px Arial Black", fill: "#66CCFF" });
+	}
+
 	if (player.tank.health == 0){
-		game.add.text(400 + game.camera.x, 450 + game.camera.y, "YOUR RESULT:  " + player.tank.score, { font: "30px Arial Black", fill: "#66CCFF" }); 
-		eurecaServer.sendScore(player.tank.score);
-	}		
+		game.add.text(400 + game.camera.x, 450 + game.camera.y, "YOU LOSE. YOUR RESULT:  " + player.tank.score, { font: "30px Arial Black", fill: "#66CCFF" }); 		
+	}	
+
+	for (var i in tanksList){
+		if (tanksList[i].tank.health == 0 && tanksList[i].tank.id != myId){
+			game.add.text(400 + game.camera.x, 450 + game.camera.y, "YOU WIN. YOUR RESULT IS  " + player.tank.score, { font: "30px Arial Black", fill: "#66CCFF" });	
+		}
+	}	
 }
 
 function tankHitItem (tank, item) {

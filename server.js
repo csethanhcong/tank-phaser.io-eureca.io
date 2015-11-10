@@ -27,7 +27,7 @@ eurecaServer.onConnect(function (conn) {
     var remote = eurecaServer.getClient(conn.id);        
 	
 	//register the client
-	clients[conn.id] = {nick:null, id:conn.id, remote:remote, highestScore:0}
+	clients[conn.id] = {nick:null, id:conn.id, remote:remote}
 
 	//here we call setId (defined in the client side)	
 	if (Object.keys(clients).length == 1){
@@ -154,14 +154,6 @@ eurecaServer.exports.handleItemInfo = function (latestItems) {
 			clients[c].lastItems = latestItems;
 		}				
 	}
-}
-
-eurecaServer.exports.sendScore = function(score){	
-	if (score > clients[this.connection.id].highestScore){
-		clients[this.connection.id].highestScore = score;
-	}
-
-	clients[this.connection.id].remote.renderHighestScore(clients[this.connection.id].highestScore);
 }
 
 server.listen(8000);
