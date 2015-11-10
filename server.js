@@ -2,6 +2,8 @@ var express = require('express')
   , app = express(app)
   , server = require('http').createServer(app);
 
+var port = Number(process.env.PORT || 8000);
+
 // serve static files from the current directory
 app.use(express.static(__dirname));
 
@@ -156,4 +158,4 @@ eurecaServer.exports.handleItemInfo = function (latestItems) {
 	}
 }
 
-server.listen(8000);
+server.listen(port);
