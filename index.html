@@ -85,8 +85,9 @@
 		<script type="text/javascript">
 
 //Code		
-const BOT_RANDOM = 1;
-const BOT_WALL = 2;
+const BOT_BASIC = 1;
+const BOT_INT = 2;
+const BOT_WALL = 3;
 const HEALTH = 1;
 
 var myId = 0;
@@ -248,11 +249,11 @@ var eurecaClientSetup = function() {
 		if (!init){
 			enemies = [];
 
-		    enemiesTotal = ENEMIES_NUM;		    
+		    enemiesTotal = ENEMIES_NUM;				    	    		  
 		    
 	    	for (var i = 0; i < enemiesTotal; i++)
 	    	{
-	        	enemies.push(new EnemyTank(i, game, player.tank, enemyBullets, i%2+1));                
+	        	enemies.push(new EnemyTank(i, game, player.tank, enemyBullets, i%3+1));                
 	    	}	 
 		}	   	          
 		init = true;
@@ -352,21 +353,29 @@ EnemyTank = function (index, game, player, bullets, botType) {
     this.nextFire = 0;
     this.alive = true;
 
-    if (this.botType == BOT_RANDOM){
+    if (this.botType == BOT_BASIC){
 	    this.shadow = game.add.sprite(x, y, 'enemy1', 'shadow');
 	    this.tank = game.add.sprite(x, y, 'enemy1', 'tank1');
 	    this.turret = game.add.sprite(x, y, 'enemy1', 'turret');
 	    this.fireRate = 1000;
-	    this.tank.health = 100;
+	    this.tank.health = 60;
 	}
 
-	if (this.botType == BOT_WALL){
+	if (this.botType == BOT_INT){
 	    this.shadow = game.add.sprite(x, y, 'enemy2', 'shadow');
 	    this.tank = game.add.sprite(x, y, 'enemy2', 'tank1');
 	    this.turret = game.add.sprite(x, y, 'enemy2', 'turret');
 	    this.fireRate = 500;
-	    this.tank.health = 150;
+	    this.tank.health = 80;
 	}	
+
+	if (this.botType == BOT_WALL){
+	    this.shadow = game.add.sprite(x, y, 'enemy3', 'shadow');
+	    this.tank = game.add.sprite(x, y, 'enemy3', 'tank1');
+	    this.turret = game.add.sprite(x, y, 'enemy3', 'turret');
+	    this.fireRate = 500;
+	    this.tank.health = 70;
+	}
 
     this.shadow.anchor.set(0.5);
     this.tank.anchor.set(0.5);
@@ -382,23 +391,27 @@ EnemyTank = function (index, game, player, bullets, botType) {
 
     this.tank.hpBar = game.add.text(x - 22, y - 42, "HP: " + this.tank.health, { font: "14px Arial Black", fill: "#66CCFF" });   
 
-    if (this.botType == BOT_RANDOM){
+    if (this.botType == BOT_BASIC){
     	game.physics.arcade.velocityFromRotation(this.tank.rotation, 100, this.tank.body.velocity);	
     } 
+    if (this.botType == BOT_INT)
+    {
+    	game.physics.arcade.velocityFromRotation(this.tank.rotation, 120, this.tank.body.velocity);
+    }
     if (this.botType == BOT_WALL)
     {
-    	game.physics.arcade.velocityFromRotation(this.tank.rotation, 100, this.tank.body.velocity);
-    }       
+    	game.physics.arcade.velocityFromRotation(this.tank.rotation, 120, this.tank.body.velocity);
+    }         
 };
+
+var rotation = 0, rotationSpeed = 0.01;
 
 EnemyTank.prototype.update = function() {	
 	if (firstPlayer == true){
 		if (this.tank.x != this.state.x ||
 		this.tank.y != this.state.y ||
-		this.tank.angle != this.state.angle ||
-		// this.tank.health != this.state.health ||
-		this.tank.rot != this.state.rot)
-		 // || this.player != this.state.player)
+		this.tank.angle != this.state.angle ||		
+		this.tank.rot != this.state.rot)		 
 		{
 			this.state.x = this.tank.x;
 			this.state.y = this.tank.y;
@@ -435,19 +448,67 @@ EnemyTank.prototype.update = function() {
     	this.kill();
     }
     
-	if (this.game.physics.arcade.distanceBetween(this.tank, this.player) < 300)
-	{
-        if (this.game.time.now > this.nextFire && this.bullets.countDead() > 0)
-        {
-            this.nextFire = this.game.time.now + this.fireRate;
+	if (this.botType == BOT_BASIC){
 
-            var bullet = this.bullets.getFirstDead();
+		if (this.game.physics.arcade.distanceBetween(this.tank, this.player) < 300)
+		{
+	        if (this.game.time.now > this.nextFire && this.bullets.countDead() > 0)
+	        {
+	            this.nextFire = this.game.time.now + this.fireRate;
 
-            bullet.reset(this.turret.x, this.turret.y);
+	            var bullet = this.bullets.getFirstDead();
 
-            bullet.rotation = this.game.physics.arcade.moveToObject(bullet, this.player, 500);
-        }
-    }
+	            bullet.reset(this.turret.x, this.turret.y);
+
+	            bullet.rotation = this.game.physics.arcade.moveToObject(bullet, this.player, 500);
+	        }
+	    }
+	}
+
+    if (this.botType == BOT_INT){
+
+    	if (this.game.physics.arcade.distanceBetween(this.tank, this.player) < 250)
+		{
+	        if (this.game.time.now > this.nextFire && this.bullets.countDead() > 0)
+	        {
+	            this.nextFire = this.game.time.now + this.fireRate;
+
+	            var bullet1 = this.bullets.getFirstDead();
+	            var bullet2 = this.bullets.getTop();	            
+
+	            bullet1.reset(this.turret.x, this.turret.y);
+	            bullet2.reset(this.turret.x, this.turret.y);
+
+	            var des1 = {};
+	            des1.x = this.player.x - 30;
+	            des1.y = this.player.y - 30;
+	            var des2 = {};
+	            des2.x = this.player.x + 30;
+	            des2.y = this.player.y + 30;
+
+	            bullet1.rotation = this.game.physics.arcade.moveToObject(bullet1, des1, 500);
+	            bullet2.rotation = this.game.physics.arcade.moveToObject(bullet2, des2, 500);
+	        }
+	    }
+   }
+
+   if (this.botType == BOT_WALL){
+   		if (this.game.physics.arcade.distanceBetween(this.tank, this.player) < 300)
+		{
+	        if (this.game.time.now > this.nextFire && this.bullets.countDead() > 0)
+	        {
+	            this.nextFire = this.game.time.now + this.fireRate;
+
+	            var bullet = this.bullets.getFirstDead();
+
+	            bullet.reset(this.turret.x, this.turret.y);
+
+	            bullet.rotation = this.game.physics.arcade.moveToObject(bullet, this.player, 500);	        
+
+	        	game.physics.arcade.velocityFromRotation(this.tank.rotation, 200, this.tank.body.velocity);
+	        }	        
+		}
+   }
 };
 
 
@@ -486,16 +547,7 @@ Tank = function (index, game, player) {
     var x = 100;
     var y = 100;
 
-    this.game = game;        
-    this.bullets = game.add.group();
-    this.bullets.enableBody = true;
-    this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
-    this.bullets.createMultiple(20, 'bullet', 0, false);
-    this.bullets.setAll('anchor.x', 0.5);
-    this.bullets.setAll('anchor.y', 0.5);
-    this.bullets.setAll('outOfBoundsKill', true);
-    this.bullets.setAll('checkWorldBounds', true);	
-	
+    this.game = game;            	
 	
 	this.currentSpeed =0;
     this.fireRate = 500;
@@ -504,6 +556,16 @@ Tank = function (index, game, player) {
 
     this.shadow = game.add.sprite(x, y, 'tank', 'shadow');
     this.tank = game.add.sprite(x, y, 'tank', 'tank1');
+
+    this.tank.bullets = game.add.group();
+    this.tank.bullets.enableBody = true;
+    this.tank.bullets.physicsBodyType = Phaser.Physics.ARCADE;
+    this.tank.bullets.createMultiple(20, 'bullet', 0, false);
+    this.tank.bullets.setAll('anchor.x', 0.5);
+    this.tank.bullets.setAll('anchor.y', 0.5);
+    this.tank.bullets.setAll('outOfBoundsKill', true);
+    this.tank.bullets.setAll('checkWorldBounds', true);	
+
     this.turret = game.add.sprite(x, y, 'tank', 'turret');   
 
     this.shadow.anchor.set(0.5);
@@ -647,10 +709,10 @@ Tank.prototype.update = function() {
 
 Tank.prototype.fire = function(target) {
 	if (!this.alive) return;
-    if (this.game.time.now > this.nextFire && this.bullets.countDead() > 0)
+    if (this.game.time.now > this.nextFire && this.tank.bullets.countDead() > 0)
     {
         this.nextFire = this.game.time.now + this.fireRate;
-        var bullet = this.bullets.getFirstDead();
+        var bullet = this.tank.bullets.getFirstDead();
         bullet.reset(this.turret.x, this.turret.y);
 
 		bullet.rotation = this.game.physics.arcade.moveToObject(bullet, target, 500);
@@ -780,6 +842,7 @@ function preload () {
     game.load.atlas('tank', 'assets/tanks.png', 'assets/tanks.json');
     game.load.atlas('enemy1', 'assets/enemy-tanks-1.png', 'assets/tanks.json');
     game.load.atlas('enemy2', 'assets/enemy-tanks-2.png', 'assets/tanks.json');
+    game.load.atlas('enemy3', 'assets/enemy-tanks-3.png', 'assets/tanks.json');
     game.load.image('logo', 'assets/logo.png');
     game.load.image('bullet', 'assets/bullet.png');
     game.load.image('earth', 'assets/light_grass.png');
@@ -865,7 +928,7 @@ function create () {
 
     cursors = game.input.keyboard.createCursorKeys();
 
-    pauseLabel = game.add.text(500 + game.camera.x, 30 + game.camera.y, 'Pause', { font: '24px Arial', fill: '#fff' });
+    pauseLabel = game.add.text(500 + game.camera.x, 30 + game.camera.y, 'Pause', { font: '24px Arial', fill: '#f00' });
     pauseLabel.inputEnabled = true;
     pauseLabel.events.onInputUp.add(function () {    	        
         game.paused = true;	       
@@ -943,7 +1006,7 @@ function update () {
 		//Check if player collide blocks
 		game.physics.arcade.collide(tanksList[i].tank, layer);
 
-		var curBullets = tanksList[i].bullets;
+		var curBullets = tanksList[i].tank.bullets;
 		//Check bullet hit world bounds
 		curBullets.forEach(function(member) {								
 			if(member.x <= 10 || member.y <=10 || member.x >= 1770 || member.y >= 940) {
@@ -1065,8 +1128,7 @@ function bulletHitBlock (bullet) {
     bullet.kill();
 }
 
-function render () {
-	// game.debug.text("Time remaining: " + game.time.events.duration, 32, 32);
+function render () {	
 }
 
 	</script>
