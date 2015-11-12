@@ -21,6 +21,8 @@ eurecaServer.attach(server);
 
 //eureca.io provides events to detect clients connect/disconnect
 
+var highestScore = 0;
+
 //detect client connection
 eurecaServer.onConnect(function (conn) {    
     console.log('New Client id=%s ', conn.id, conn.remoteAddress);
@@ -156,6 +158,15 @@ eurecaServer.exports.handleItemInfo = function (latestItems) {
 			clients[c].lastItems = latestItems;
 		}				
 	}
+}
+
+//be exposed to client side
+eurecaServer.exports.handleScore = function (score) {
+	if (score > highestScore){
+		highestScore = score;
+	}
+	console.log(score);
+	clients[this.connection.id].remote.renderHighestScore(highestScore);
 }
 
 server.listen(port);

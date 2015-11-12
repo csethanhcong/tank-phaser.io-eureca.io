@@ -88,7 +88,8 @@
 const BOT_BASIC = 1;
 const BOT_INT = 2;
 const BOT_WALL = 3;
-const HEALTH = 1;
+const HEALTH_ITEM = 1;
+const SPEED_ITEM = 2;
 
 var myId = 0;
 var init = false;
@@ -273,8 +274,14 @@ var eurecaClientSetup = function() {
 		itemCount++;
 
 		if (itemCount <= 1) {
-			item = new Item(game, HEALTH);			
+			var itemType = Math.round(Math.random() + 1);
+			console.log(itemType);
+			item = new Item(game, itemType);			
 		}
+	}
+
+	eurecaClient.exports.renderHighestScore = function(highestScore) {
+		game.add.text(400 + game.camera.x, 500 + game.camera.y, "HIGHEST SCORE:  " + highestScore, { font: "30px Arial Black", fill: "#66CCFF" });
 	}
 }
 
@@ -298,15 +305,19 @@ Item = function (game, itemType) {
 
 	this.game = game;	
 	this.tank = tank;
-	this.state = {};
-	this.itemType = itemType;	
+	this.state = {};		
 
-	if (this.itemType == HEALTH) {		
-		this.hpRegen = 100;
-		this.sprite = game.add.sprite(x, y, 'health');
-		this.sprite.alive = true;
-		game.physics.enable(this.sprite, Phaser.Physics.ARCADE);
+	if (itemType == HEALTH_ITEM) {				
+		this.sprite = game.add.sprite(x, y, 'health');						
 	}
+
+	if (itemType == SPEED_ITEM) {				
+		this.sprite = game.add.sprite(x, y, 'speed');		
+	}
+
+	this.sprite.itemType = itemType;	
+	this.sprite.alive = true;
+	game.physics.enable(this.sprite, Phaser.Physics.ARCADE);
 }
 
 Item.prototype.update = function () {	
@@ -332,8 +343,8 @@ EnemyTank = function (index, game, player, bullets, botType) {
     var x = game.world.randomX;
     var y = game.world.randomY;
 
-    if (x <= 100){
-    	x += 100;
+    if (x <= 300){
+    	x += 300;
     }
     if (y <= 100){
     	y += 100;
@@ -421,7 +432,7 @@ EnemyTank.prototype.update = function() {
 			// this.state.player = this.player;
 			this.state.index = parseInt(this.tank.name);
 
-			eurecaServer.handleBotsInfo(this.state);
+			// eurecaServer.handleBotsInfo(this.state);
 		}	
 	}
 
@@ -552,7 +563,7 @@ Tank = function (index, game, player) {
 	this.currentSpeed =0;
     this.fireRate = 500;
     this.nextFire = 0;
-    this.alive = true;
+    this.alive = true;    
 
     this.shadow = game.add.sprite(x, y, 'tank', 'shadow');
     this.tank = game.add.sprite(x, y, 'tank', 'tank1');
@@ -573,6 +584,7 @@ Tank = function (index, game, player) {
     this.turret.anchor.set(0.3, 0.5);
 
     this.tank.score = 0;
+    this.tank.speedBonus = 0;
     this.tank.id = index;
     game.physics.enable(this.tank, Phaser.Physics.ARCADE);
     this.tank.body.immovable = false;
@@ -634,7 +646,7 @@ Tank.prototype.update = function() {
     if (this.cursor.up)
     {
         //  The speed we'll travel at
-        this.currentSpeed = 300;
+        this.currentSpeed = 300 + this.tank.speedBonus;
     }
     else
     {
@@ -689,6 +701,7 @@ Tank.prototype.update = function() {
     this.tank.hpBar.x = this.tank.x - 22;
     this.tank.hpBar.y = this.tank.y - 50;
     if (this.tank.health <= 30) {
+    	this.tank.speedBonus = 0;
 		this.tank.hpBar.setStyle({ font: "14px Arial Black", fill: "#FF1A1A" });
 	}
 	else{
@@ -848,6 +861,7 @@ function preload () {
     game.load.image('earth', 'assets/light_grass.png');
     game.load.spritesheet('kaboom', 'assets/explosion.png', 64, 64, 23);    
     game.load.image('health', 'assets/item/health.png');
+    game.load.image('speed', 'assets/item/speed.png');
 
     // load music and sound effects
     game.load.audio('bg-music', 'assets/audio/bg-music-2.wav');
@@ -928,7 +942,10 @@ function create () {
 
     cursors = game.input.keyboard.createCursorKeys();
 
-    pauseLabel = game.add.text(500 + game.camera.x, 30 + game.camera.y, 'Pause', { font: '24px Arial', fill: '#f00' });
+    pauseLabel = game.add.text(500 + game.camera.x, 10 + game.camera.y, 'Pause', { font: '24px Arial', fill: '#f00' });
+    pauseLabel.stroke = "#0000E6";
+    pauseLabel.strokeThickness = 8;
+    pauseLabel.setShadow(2, 2, "#9494B8", 2, true, false);
     pauseLabel.inputEnabled = true;
     pauseLabel.events.onInputUp.add(function () {    	        
         game.paused = true;	       
@@ -960,6 +977,8 @@ function removeLogo () {
 function update () {
 	if (pauseLabel){
 		pauseLabel.setText("Pause");
+		pauseLabel.x = 500 + game.camera.x;
+		pauseLabel.y = 10 + game.camera.y;
 	}	
 	//do not update if client not ready
 	if (!ready) return;	
@@ -967,8 +986,9 @@ function update () {
 	//Update item
 	if (item){			
 		item.update();		
-		if (firstPlayer == true && item.sprite.alive == false){			
-			item = new Item(game, HEALTH);
+		if (firstPlayer == true && item.sprite.alive == false){	
+			var itemType = Math.round(Math.random() + 1);		
+			item = new Item(game, itemType);
 			item.update();
 		}
 	}		
@@ -1078,11 +1098,18 @@ function update () {
 
 	if (winSingle == true && singleMode == true && win == false){
 		game.add.text(400 + game.camera.x, 450 + game.camera.y, "YOU WIN. YOUR RESULT:  " + player.tank.score, { font: "30px Arial Black", fill: "#66CCFF" });
+		eurecaServer.handleScore(player.tank.score);
 		win = true;
 	}
 
-	if (player.tank.health == 0 && win == false){
+	if (winSingle == true && player.tank.health == 0 && win == false){
+		game.add.text(400 + game.camera.x, 450 + game.camera.y, "YOU LOSE. YOUR RESULT:  " + player.tank.score, { font: "30px Arial Black", fill: "#66CCFF" }); 		
+		win = true;		
+	}
+
+	if (winSingle == false && player.tank.health == 0 && win == false){
 		game.add.text(400 + game.camera.x, 450 + game.camera.y, "YOU LOSE. YOUR RESULT:  " + player.tank.score, { font: "30px Arial Black", fill: "#66CCFF" }); 
+		eurecaServer.handleScore(player.tank.score);
 		win = true;		
 	}	
 
@@ -1096,7 +1123,12 @@ function update () {
 
 function tankHitItem (tank, item) {
 	if (tank.id == myId){
-		tank.health = 100;
+		if (item.itemType == HEALTH_ITEM){
+			tank.health = 100;
+		}		
+		if (item.itemType == SPEED_ITEM){
+			tank.speedBonus = 100;
+		}
 	}			
 
 	// Load sound effect
